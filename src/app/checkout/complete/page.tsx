@@ -140,13 +140,11 @@ export default function CheckoutCompletePage() {
         {/* 액션 버튼 */}
         <div className="mt-8 flex flex-col gap-3">
           <Button
-            asChild
+            render={<Link href={`/slot/${order.slotId}`} />}
             className="w-full rounded-card py-4 font-display text-[15px] font-bold bg-brand text-white hover:bg-brand-dark"
           >
-            <Link href={`/slot/${order.slotId}`}>
-              슬롯으로 돌아가기
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
+            슬롯으로 돌아가기
+            <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
           <Button
             variant="outline"
