@@ -7,7 +7,7 @@ import { FlavorBars } from "./FlavorBars"
 import { RoastingLevel } from "./RoastingLevel"
 import { useFunding } from "@/hooks/useFunding"
 import { useComments } from "@/hooks/useComments"
-import { toggleLike, votePoll, createOrder } from "@/lib/api"
+import { toggleLike, votePoll, reservePayment } from "@/lib/api"
 import { useCheckoutStore } from "@/store/checkoutStore"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -30,7 +30,16 @@ interface SlotDetailTabsProps {
 
 export function SlotDetailTabs({ slot, slotId }: SlotDetailTabsProps) {
   const router = useRouter()
-  const { setOrderId, setSelectedReward: setStoreReward } = useCheckoutStore()
+  const {
+    setOrderId,
+    setSelectedReward: setStoreReward,
+    setAmount,
+    setOrderName,
+    setSlotId,
+    setSlotTitle,
+    setSlotThumbnail,
+    setMasterName,
+  } = useCheckoutStore()
 
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>("스토리")
   const [liked, setLiked] = useState(slot.isLiked ?? false)
@@ -81,18 +90,21 @@ export function SlotDetailTabs({ slot, slotId }: SlotDetailTabsProps) {
     setCommentText("")
   }
 
+  const SERVICE_ID = "1"
+
   async function handleFunding() {
-    if (!activeReward || !activeRewardId) return
+    if (!activeReward) return
     setIsOrdering(true)
     try {
-      const order = await createOrder({
-        slotId,
-        rewardId: activeRewardId,
-        quantity: 1,
-        paymentMethod: "card",
-      })
-      setOrderId(order.id)
+      const { orderId } = await reservePayment(SERVICE_ID, activeReward.planId)
+      setOrderId(orderId)
       setStoreReward(activeReward)
+      setAmount(activeReward.price)
+      setOrderName(`${slot.title} - ${activeReward.label}`)
+      setSlotId(slotId)
+      setSlotTitle(slot.title)
+      setSlotThumbnail(slot.thumbnailUrl ?? "")
+      setMasterName(slot.master.name)
       router.push("/checkout")
     } finally {
       setIsOrdering(false)
