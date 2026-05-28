@@ -1,68 +1,84 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { CheckCircle2, Package, CalendarDays, ArrowRight } from "lucide-react"
+import {
+  CheckCircle2,
+  Package,
+  CalendarDays,
+  ArrowRight,
+  Loader2,
+  XCircle,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useCheckoutStore } from "@/store/checkoutStore"
-import { getOrder } from "@/lib/api"
-import type { Order } from "@/types/funding"
+import { confirmPayment } from "@/lib/api"
 
-const PAYMENT_LABEL: Record<string, string> = {
-  card: "신용 / 체크카드",
-  bank: "계좌이체",
-  simple: "간편결제",
-  point: "포인트 결제",
-}
+type ConfirmResult = Awaited<ReturnType<typeof confirmPayment>>
 
 export default function CheckoutCompletePage() {
   const router = useRouter()
-  const { orderId, reset } = useCheckoutStore()
-  const [order, setOrder] = useState<Order | null>(null)
+  const searchParams = useSearchParams()
+  const { slotId, slotTitle, selectedReward, reset } = useCheckoutStore()
+
+  const [result, setResult] = useState<ConfirmResult | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  const paymentKey = searchParams.get("paymentKey") ?? ""
+  const orderId = searchParams.get("orderId") ?? ""
+  const amount = Number(searchParams.get("amount") ?? "0")
 
   useEffect(() => {
-    if (!orderId) {
+    if (!paymentKey || !orderId || !amount) {
       router.replace("/feed")
       return
     }
-    getOrder(orderId).then(setOrder)
-  }, [orderId, router])
 
-  if (!order) {
+    confirmPayment(paymentKey, orderId, amount)
+      .then(setResult)
+      .catch((err) => {
+        const msg =
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (err as any)?.response?.data?.message ?? "결제 승인에 실패했습니다."
+        setError(msg)
+      })
+    // intentionally empty deps — run only on mount with captured param values
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  if (error) {
     return (
       <main className="min-h-screen bg-surface">
-        <div className="mx-auto max-w-[640px] px-6 py-20 text-center text-ink-muted">
-          로딩 중...
+        <div className="mx-auto max-w-[640px] px-6 py-20 text-center">
+          <XCircle className="mx-auto h-12 w-12 text-red-400" strokeWidth={1.5} />
+          <h1 className="mt-4 font-display text-xl font-bold text-ink-1">결제 승인 실패</h1>
+          <p className="mt-2 text-sm text-ink-muted">{error}</p>
+          <Button
+            className="mt-8 rounded-card bg-brand px-8 py-3 font-display font-bold text-white hover:bg-brand-dark"
+            onClick={() => router.replace("/feed")}
+          >
+            피드로 돌아가기
+          </Button>
         </div>
       </main>
     )
   }
 
-  const grandTotal = order.totalPrice + order.shippingFee
+  if (!result) {
+    return (
+      <main className="min-h-screen bg-surface">
+        <div className="mx-auto max-w-[640px] px-6 py-20 text-center text-ink-muted">
+          <Loader2 className="mx-auto h-6 w-6 animate-spin" />
+          <p className="mt-3 text-sm">결제 승인 중...</p>
+        </div>
+      </main>
+    )
+  }
 
   return (
     <main className="min-h-screen bg-surface">
       <div className="mx-auto max-w-[640px] px-6 pb-24 pt-16">
-
-        {/*
-         * [TODO: 백엔드 연동]
-         * 이 페이지는 TossPay 결제 완료 콜백 이후 진입하는 화면입니다.
-         * 실제 연동 시 TossPay successUrl 로 이 경로(/checkout/complete)를 지정하고,
-         * URL 파라미터(paymentKey, orderId, amount)를 받아 서버 사이드에서 결제 승인을 처리하세요.
-         *
-         * 참고: https://docs.tosspayments.com/guides/payment-widget/integration
-         */}
-
-        {/* ⚠️ 개발 중 안내 */}
-        <div className="mb-8 flex items-start gap-3 rounded-inner border border-amber-200 bg-amber-50 px-5 py-4">
-          <span className="mt-0.5 text-base leading-none">🚧</span>
-          <p className="text-[13px] leading-relaxed text-amber-800">
-            <span className="font-bold">임시 완료 화면입니다.</span> TossPay 연동 후 결제 승인
-            처리가 추가될 예정입니다.
-          </p>
-        </div>
-
         {/* 완료 배너 */}
         <div className="mb-8 flex flex-col items-center text-center">
           <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
@@ -81,22 +97,24 @@ export default function CheckoutCompletePage() {
               주문 상세
             </h2>
           </div>
-
-          <div className="space-y-0 divide-y divide-border">
-            {[
-              { label: "주문번호", val: order.id },
-              { label: "슬롯", val: order.slotTitle },
-              { label: "리워드", val: order.rewardLabel },
-              {
-                label: "결제금액",
-                val: `${grandTotal.toLocaleString()}원`,
-                highlight: true,
-              },
-              {
-                label: "결제수단",
-                val: PAYMENT_LABEL[order.paymentMethod ?? "card"] ?? order.paymentMethod,
-              },
-            ].map(({ label, val, highlight }) => (
+          <div className="divide-y divide-border">
+            {(
+              [
+                { label: "주문번호", val: result.orderId },
+                { label: "슬롯", val: slotTitle || result.orderName },
+                { label: "리워드", val: selectedReward?.label ?? "-" },
+                {
+                  label: "결제금액",
+                  val: `${result.totalAmount.toLocaleString()}원`,
+                  highlight: true,
+                },
+                { label: "결제수단", val: result.method },
+                {
+                  label: "승인시간",
+                  val: new Date(result.approvedAt).toLocaleString("ko-KR"),
+                },
+              ] as const
+            ).map(({ label, val, highlight }) => (
               <div key={label} className="flex items-start justify-between gap-4 px-6 py-4">
                 <span className="shrink-0 text-[13px] text-ink-muted">{label}</span>
                 <span
@@ -131,7 +149,7 @@ export default function CheckoutCompletePage() {
               <CalendarDays className="h-4 w-4 shrink-0 text-brand" />
               <p className="text-[13px] text-ink-2">
                 예상 발송일:{" "}
-                <span className="font-semibold text-ink-1">{order.estimatedDelivery}</span>
+                <span className="font-semibold text-ink-1">펀딩 마감 후 7~14일 이내</span>
               </p>
             </div>
           </div>
@@ -140,7 +158,7 @@ export default function CheckoutCompletePage() {
         {/* 액션 버튼 */}
         <div className="mt-8 flex flex-col gap-3">
           <Button
-            render={<Link href={`/slot/${order.slotId}`} />}
+            render={<Link href={`/slot/${slotId}`} />}
             className="w-full rounded-card py-4 font-display text-[15px] font-bold bg-brand text-white hover:bg-brand-dark"
           >
             슬롯으로 돌아가기
