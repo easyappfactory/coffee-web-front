@@ -711,10 +711,11 @@ export const mockSlotDetails: Record<string, SlotDetail> = Object.fromEntries(
 // ── Per-slot funding data ─────────────────────────────────────────────────
 
 function makeRewards(slotId: string, earlyLabel: string, earlyPrice: number, normalPrice: number, classPrice: number, earlyRemaining?: number): Reward[] {
+  const base = (parseInt(slotId) - 1) * 3;
   return [
-    { id: `${slotId}_r1`, label: earlyLabel, price: earlyPrice, description: "200g 단일 원두 + 핸드라이팅 테이스팅 노트 (한정)", remaining: earlyRemaining },
-    { id: `${slotId}_r2`, label: "일반 펀딩", price: normalPrice, description: "200g 단일 원두 + 디지털 브루잉 가이드" },
-    { id: `${slotId}_r3`, label: "마스터 클래스 패키지", price: classPrice, description: "400g 원두 + 온라인 원데이 클래스 초대권", remaining: 8 },
+    { id: `${slotId}_r1`, label: earlyLabel, price: earlyPrice, description: "200g 단일 원두 + 핸드라이팅 테이스팅 노트 (한정)", remaining: earlyRemaining, planId: base + 1 },
+    { id: `${slotId}_r2`, label: "일반 펀딩", price: normalPrice, description: "200g 단일 원두 + 디지털 브루잉 가이드", planId: base + 2 },
+    { id: `${slotId}_r3`, label: "마스터 클래스 패키지", price: classPrice, description: "400g 원두 + 온라인 원데이 클래스 초대권", remaining: 8, planId: base + 3 },
   ];
 }
 

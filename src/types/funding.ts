@@ -4,6 +4,7 @@ export interface Reward {
   price: number;
   description: string;
   remaining?: number;
+  planId: number;
 }
 
 export interface FundingStatus {
