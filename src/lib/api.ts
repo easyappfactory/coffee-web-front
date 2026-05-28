@@ -5,11 +5,9 @@ import {
   mockSlotDetails,
   mockSlotFundingData,
   mockMaster,
-  mockMasterProfiles,
 } from "./mock/slots";
-import { mockOrder } from "./mock/orders";
 import type { Slot, SlotDetail } from "@/types/slot";
-import type { FundingStatus, Reward, Order } from "@/types/funding";
+import type { FundingStatus, Reward } from "@/types/funding";
 import type { Master } from "@/types/user";
 
 const USE_MOCK = true;
@@ -129,60 +127,5 @@ export async function toggleFollow(masterId: string): Promise<{ following: boole
     return { following: true };
   }
   const res = await apiClient.post(`/api/masters/${masterId}/follow`);
-  return res.data;
-}
-
-export async function createOrder(payload: {
-  slotId: string;
-  rewardId: string;
-  quantity: number;
-  paymentMethod: string;
-}): Promise<Order> {
-  if (USE_MOCK) {
-    await delay(400);
-    const slotData = mockSlotFundingData[payload.slotId];
-    const reward = slotData?.rewards.find((r) => r.id === payload.rewardId);
-    const slot = mockSlots.find((s) => s.id === payload.slotId);
-    const masterProfile = slot ? mockMasterProfiles[slot.master.id] : undefined;
-    return {
-      ...mockOrder,
-      id: `ord_${Date.now()}`,
-      slotId: payload.slotId,
-      slotTitle: slot?.title ?? mockOrder.slotTitle,
-      slotThumbnail: slot?.thumbnailUrl ?? mockOrder.slotThumbnail,
-      masterName: masterProfile?.name ?? slot?.master.name ?? "",
-      masterRole: masterProfile?.role ?? slot?.master.role ?? "",
-      rewardId: payload.rewardId,
-      rewardLabel: reward?.label ?? mockOrder.rewardLabel,
-      rewardDescription: reward?.description ?? "",
-      quantity: payload.quantity,
-      unitPrice: reward?.price ?? mockOrder.unitPrice,
-      totalPrice: (reward?.price ?? mockOrder.unitPrice) * payload.quantity,
-      paymentMethod: payload.paymentMethod,
-      status: "pending",
-    };
-  }
-  const res = await apiClient.post<Order>("/api/orders", payload);
-  return res.data;
-}
-
-export async function getOrder(orderId: string): Promise<Order> {
-  if (USE_MOCK) {
-    await delay();
-    return mockOrder;
-  }
-  const res = await apiClient.get<Order>(`/api/orders/${orderId}`);
-  return res.data;
-}
-
-export async function processPayment(
-  orderId: string,
-  paymentMethod: string
-): Promise<Order> {
-  if (USE_MOCK) {
-    await delay(600);
-    return { ...mockOrder, status: "paid" };
-  }
-  const res = await apiClient.patch<Order>(`/api/orders/${orderId}/payment`, { paymentMethod });
   return res.data;
 }
