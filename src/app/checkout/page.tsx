@@ -19,7 +19,8 @@ const PAYMENT_METHODS = [
 
 export default function CheckoutPage() {
   const router = useRouter()
-  const { orderId, paymentMethod, setPaymentMethod } = useCheckoutStore()
+  const { orderId } = useCheckoutStore()
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "bank" | "simple" | "point">("card")
   const [order, setOrder] = useState<Order | null>(null)
   const [agreed, setAgreed] = useState(false)
   const [isPaying, setIsPaying] = useState(false)

@@ -17,8 +17,38 @@ const USE_MOCK = true;
 export const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080",
   timeout: 10000,
+  withCredentials: true,
   headers: { "Content-Type": "application/json" },
 });
+
+// ── 결제 API (게이트웨이 경유, USE_MOCK 무시) ────────────────────────────────
+
+const PAY_PREFIX = process.env.NEXT_PUBLIC_PAY_API_PREFIX ?? "/api/v1/bs";
+
+export async function reservePayment(
+  serviceId: string,
+  planId: number
+): Promise<{ orderId: string }> {
+  const res = await apiClient.post(`${PAY_PREFIX}/pay/reserve`, { serviceId, planId });
+  return res.data.data;
+}
+
+export async function confirmPayment(
+  paymentKey: string,
+  orderId: string,
+  amount: number
+): Promise<{
+  paymentKey: string;
+  orderId: string;
+  orderName: string;
+  totalAmount: number;
+  status: string;
+  method: string;
+  approvedAt: string;
+}> {
+  const res = await apiClient.post(`${PAY_PREFIX}/pay/confirm`, { paymentKey, orderId, amount });
+  return res.data.data;
+}
 
 function delay(ms = 300) {
   return new Promise((resolve) => setTimeout(resolve, ms));
