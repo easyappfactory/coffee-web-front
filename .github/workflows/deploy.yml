@@ -1,0 +1,13 @@
+name: Trigger Vercel Deploy
+
+on:
+  push:
+    branches:
+      - main # main 브랜치에 푸시나 머지가 일어날 때 작동
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Vercel Deploy Hook
+        run: curl -X POST "${{ secrets.DEPLOY_MAIN }}"
