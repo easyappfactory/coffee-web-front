@@ -114,12 +114,12 @@ export default function CheckoutCompletePage() {
                   val: new Date(result.approvedAt).toLocaleString("ko-KR"),
                 },
               ] as const
-            ).map(({ label, val, highlight }) => (
+            ).map(({ label, val, ...rest }) => (
               <div key={label} className="flex items-start justify-between gap-4 px-6 py-4">
                 <span className="shrink-0 text-[13px] text-ink-muted">{label}</span>
                 <span
                   className={`text-right text-[13px] ${
-                    highlight
+                    "highlight" in rest && rest.highlight
                       ? "font-display font-extrabold text-brand"
                       : "font-medium text-ink-1"
                   }`}
