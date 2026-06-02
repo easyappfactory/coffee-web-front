@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import {
@@ -17,7 +17,7 @@ import { confirmPayment } from "@/lib/api"
 
 type ConfirmResult = Awaited<ReturnType<typeof confirmPayment>>
 
-export default function CheckoutCompletePage() {
+function CheckoutCompleteContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { slotId, slotTitle, selectedReward, reset } = useCheckoutStore()
@@ -177,5 +177,13 @@ export default function CheckoutCompletePage() {
         </div>
       </div>
     </main>
+  )
+}
+
+export default function CheckoutCompletePage() {
+  return (
+    <Suspense>
+      <CheckoutCompleteContent />
+    </Suspense>
   )
 }
