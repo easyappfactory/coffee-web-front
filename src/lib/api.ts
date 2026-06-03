@@ -19,6 +19,23 @@ export const apiClient = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
+// POC: X-User-Id / X-Service-Id 헤더 자동 주입
+apiClient.interceptors.request.use((config) => {
+  if (typeof window !== "undefined") {
+    const userId = localStorage.getItem("pocUserId") ?? POC_USERS.USER;
+    config.headers["X-User-Id"] = userId;
+    config.headers["X-Service-Id"] = "brewing-society";
+  }
+  return config;
+});
+
+export const POC_USERS: Record<string, string> = {
+  USER: "01966a00-0000-7000-8000-000000000001",
+  MANAGER: "01966a00-0000-7000-8000-000000000002",
+  ADMIN: "01966a00-0000-7000-8000-000000000003",
+  SYSTEM_MANAGER: "01966a00-0000-7000-8000-000000000004",
+};
+
 // ── 결제 API (게이트웨이 경유, USE_MOCK 무시) ────────────────────────────────
 
 const PAY_PREFIX = process.env.NEXT_PUBLIC_PAY_API_PREFIX ?? "/api/v1/bs";
