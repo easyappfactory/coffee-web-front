@@ -431,11 +431,11 @@ export const mockSlotDetails: Record<string, SlotDetail> = Object.fromEntries(
 
 // ── Per-slot funding data ─────────────────────────────────────────────────
 
-// Mock variant UUIDs: slotId(2) + rewardIndex(2) padded into UUIDv4-like format
+/// Mock variant UUIDs: 8-4-4-4-12 standard UUID format (36 chars)
 function mockVariantId(slotId: string, rewardIdx: number): string {
   const s = slotId.padStart(4, "0");
   const r = String(rewardIdx).padStart(4, "0");
-  return `019600${s}-0000-7000-8000-0000000${r}00`;
+  return `01960${s}-0000-7000-8000-00000${r}0000`;
 }
 
 function makeRewards(slotId: string, price200g: number, price600g: number): Reward[] {
