@@ -54,10 +54,11 @@ export async function confirmPayment(
   orderId: string,
   amount: number
 ): Promise<{
-  paymentKey: string;
   orderId: string;
+  orderName: string;
   amount: number;
   status: string;
+  paymentKey: string;
 }> {
   const res = await apiClient.post(`${PAY_PREFIX}/order/confirm`, { paymentKey, orderId, amount });
   return res.data.data;

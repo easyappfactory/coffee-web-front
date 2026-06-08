@@ -17,39 +17,17 @@ import { confirmPayment } from "@/lib/api"
 
 type ConfirmResult = Awaited<ReturnType<typeof confirmPayment>>
 
-// sessionStorage에서 직접 checkout 컨텍스트를 복원
-function getCheckoutContext() {
-  if (typeof window === "undefined") return null
-  try {
-    const raw = sessionStorage.getItem("checkout-store")
-    if (!raw) return null
-    const parsed = JSON.parse(raw)
-    return parsed?.state as {
-      slotId: string | null
-      slotTitle: string
-      selectedReward: { label: string; price: number; description?: string } | null
-    } | null
-  } catch {
-    return null
-  }
-}
-
 function CheckoutCompleteContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { reset } = useCheckoutStore()
+  const { slotId, slotTitle, selectedReward, reset } = useCheckoutStore()
 
   const [result, setResult] = useState<ConfirmResult | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [ctx] = useState(getCheckoutContext)
 
   const paymentKey = searchParams.get("paymentKey") ?? ""
   const orderId = searchParams.get("orderId") ?? ""
   const amount = Number(searchParams.get("amount") ?? "0")
-
-  const slotId = ctx?.slotId ?? null
-  const slotTitle = ctx?.slotTitle ?? ""
-  const selectedReward = ctx?.selectedReward ?? null
 
   useEffect(() => {
     if (!paymentKey || !orderId || !amount) {
@@ -123,7 +101,7 @@ function CheckoutCompleteContent() {
             {(
               [
                 { label: "주문번호", val: result.orderId },
-                { label: "슬롯", val: slotTitle || "-" },
+                { label: "슬롯", val: result.orderName || slotTitle || "-" },
                 { label: "리워드", val: selectedReward?.label ?? "-" },
                 {
                   label: "결제금액",
