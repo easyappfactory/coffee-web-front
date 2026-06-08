@@ -101,18 +101,14 @@ function CheckoutCompleteContent() {
             {(
               [
                 { label: "주문번호", val: result.orderId },
-                { label: "슬롯", val: slotTitle || result.orderName },
+                { label: "슬롯", val: slotTitle || "-" },
                 { label: "리워드", val: selectedReward?.label ?? "-" },
                 {
                   label: "결제금액",
-                  val: `${result.totalAmount.toLocaleString()}원`,
+                  val: `${result.amount.toLocaleString()}원`,
                   highlight: true,
                 },
-                { label: "결제수단", val: result.method },
-                {
-                  label: "승인시간",
-                  val: new Date(result.approvedAt).toLocaleString("ko-KR"),
-                },
+                { label: "상태", val: result.status },
               ] as const
             ).map(({ label, val, ...rest }) => (
               <div key={label} className="flex items-start justify-between gap-4 px-6 py-4">
