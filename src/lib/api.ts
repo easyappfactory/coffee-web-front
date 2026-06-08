@@ -9,7 +9,6 @@ import {
 import type { Slot, SlotDetail } from "@/types/slot";
 import type { FundingStatus, Reward } from "@/types/funding";
 import type { Master } from "@/types/user";
-import type { CreateSlotRequest, CreateSlotResponse } from "@/types/slotRegistration";
 
 const USE_MOCK = true;
 
@@ -146,11 +145,4 @@ export async function toggleFollow(masterId: string): Promise<{ following: boole
   return res.data;
 }
 
-export async function createSlot(data: CreateSlotRequest): Promise<CreateSlotResponse> {
-  if (USE_MOCK) {
-    await delay(500);
-    return { id: `slot_${Date.now()}`, createdAt: new Date().toISOString() };
-  }
-  const res = await apiClient.post("/api/slots", data);
-  return res.data;
-}
+
