@@ -91,7 +91,7 @@ export function SlotDetailTabs({ slot, slotId }: SlotDetailTabsProps) {
     setCommentText("")
   }
 
-  const SERVICE_ID = "1"
+  const SERVICE_ID = "SRV_001"
 
   async function handleFunding() {
     if (!activeReward) return
@@ -100,7 +100,7 @@ export function SlotDetailTabs({ slot, slotId }: SlotDetailTabsProps) {
       const { orderId } = await reservePayment(SERVICE_ID, activeReward.variantId, quantity)
       setOrderId(orderId)
       setStoreReward(activeReward)
-      setAmount(activeReward.price)
+      setAmount(activeReward.price * quantity)
       setOrderName(`${slot.title} - ${activeReward.label}`)
       setSlotId(slotId)
       setSlotTitle(slot.title)
