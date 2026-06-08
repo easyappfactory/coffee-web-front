@@ -710,12 +710,41 @@ export const mockSlotDetails: Record<string, SlotDetail> = Object.fromEntries(
 
 // ── Per-slot funding data ─────────────────────────────────────────────────
 
+// Mock variant UUIDs: slotId(2) + rewardIndex(2) padded into UUIDv4-like format
+function mockVariantId(slotId: string, rewardIdx: number): string {
+  const s = slotId.padStart(4, "0");
+  const r = String(rewardIdx).padStart(4, "0");
+  return `019600${s}-0000-7000-8000-0000000${r}00`;
+}
+
 function makeRewards(slotId: string, earlyLabel: string, earlyPrice: number, normalPrice: number, classPrice: number, earlyRemaining?: number): Reward[] {
-  const base = (parseInt(slotId) - 1) * 3;
   return [
-    { id: `${slotId}_r1`, label: earlyLabel, price: earlyPrice, description: "200g 단일 원두 + 핸드라이팅 테이스팅 노트 (한정)", remaining: earlyRemaining, planId: base + 1 },
-    { id: `${slotId}_r2`, label: "일반 펀딩", price: normalPrice, description: "200g 단일 원두 + 디지털 브루잉 가이드", planId: base + 2 },
-    { id: `${slotId}_r3`, label: "마스터 클래스 패키지", price: classPrice, description: "400g 원두 + 온라인 원데이 클래스 초대권", remaining: 8, planId: base + 3 },
+    {
+      id: `${slotId}_r1`,
+      label: earlyLabel,
+      price: earlyPrice,
+      description: "200g 단일 원두 + 핸드라이팅 테이스팅 노트 (한정)",
+      remaining: earlyRemaining,
+      variantId: mockVariantId(slotId, 1),
+      optionValues: [{ optionType: "용량", value: "200g" }],
+    },
+    {
+      id: `${slotId}_r2`,
+      label: "일반 펀딩",
+      price: normalPrice,
+      description: "200g 단일 원두 + 디지털 브루잉 가이드",
+      variantId: mockVariantId(slotId, 2),
+      optionValues: [{ optionType: "용량", value: "200g" }],
+    },
+    {
+      id: `${slotId}_r3`,
+      label: "마스터 클래스 패키지",
+      price: classPrice,
+      description: "400g 원두 + 온라인 원데이 클래스 초대권",
+      remaining: 8,
+      variantId: mockVariantId(slotId, 3),
+      optionValues: [{ optionType: "용량", value: "400g" }],
+    },
   ];
 }
 
