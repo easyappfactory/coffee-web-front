@@ -9,6 +9,7 @@ import {
 import type { Slot, SlotDetail } from "@/types/slot";
 import type { FundingStatus, Reward } from "@/types/funding";
 import type { Master } from "@/types/user";
+import type { CreateSlotRequest, CreateSlotResponse } from "@/types/slotRegistration";
 
 const USE_MOCK = true;
 
@@ -44,8 +45,8 @@ export async function reservePayment(
   serviceId: string,
   variantId: string,
   quantity: number
-): Promise<{ orderId: string }> {
-  const res = await apiClient.post(`${PAY_PREFIX}/pay/reserve`, { serviceId, variantId, quantity });
+): Promise<{ orderId: string; amount: number }> {
+  const res = await apiClient.post(`${PAY_PREFIX}/checkout/reserve`, { serviceId, variantId, quantity });
   return res.data.data;
 }
 
@@ -56,13 +57,10 @@ export async function confirmPayment(
 ): Promise<{
   paymentKey: string;
   orderId: string;
-  orderName: string;
-  totalAmount: number;
+  amount: number;
   status: string;
-  method: string;
-  approvedAt: string;
 }> {
-  const res = await apiClient.post(`${PAY_PREFIX}/pay/confirm`, { paymentKey, orderId, amount });
+  const res = await apiClient.post(`${PAY_PREFIX}/checkout/confirm`, { paymentKey, orderId, amount });
   return res.data.data;
 }
 
@@ -145,5 +143,14 @@ export async function toggleFollow(masterId: string): Promise<{ following: boole
     return { following: true };
   }
   const res = await apiClient.post(`/api/masters/${masterId}/follow`);
+  return res.data;
+}
+
+export async function createSlot(data: CreateSlotRequest): Promise<CreateSlotResponse> {
+  if (USE_MOCK) {
+    await delay(500);
+    return { id: `slot_${Date.now()}`, createdAt: new Date().toISOString() };
+  }
+  const res = await apiClient.post("/api/slots", data);
   return res.data;
 }
