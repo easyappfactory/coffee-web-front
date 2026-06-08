@@ -101,7 +101,7 @@ function CheckoutCompleteContent() {
             {(
               [
                 { label: "주문번호", val: result.orderId },
-                { label: "슬롯", val: slotTitle || "-" },
+                { label: "슬롯", val: result.orderName || slotTitle || "-" },
                 { label: "리워드", val: selectedReward?.label ?? "-" },
                 {
                   label: "결제금액",
