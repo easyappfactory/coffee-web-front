@@ -431,21 +431,23 @@ export const mockSlotDetails: Record<string, SlotDetail> = Object.fromEntries(
 
 // ── Per-slot funding data ─────────────────────────────────────────────────
 
-/// Mock variant UUIDs: 8-4-4-4-12 standard UUID format (36 chars)
-function mockVariantId(slotId: string, rewardIdx: number): string {
-  const s = slotId.padStart(4, "0");
-  const r = String(rewardIdx).padStart(4, "0");
-  return `01960${s}-0000-7000-8000-00000${r}0000`;
-}
+// DB 시드 데이터의 실제 product_variant UUID
+const VARIANT_IDS: Record<string, { v200g: string; v600g: string }> = {
+  "1": { v200g: "01960001-0000-7000-8000-000000010000", v600g: "01960001-0000-7000-8000-000000020000" },
+  "2": { v200g: "01960002-0000-7000-8000-000000010000", v600g: "01960002-0000-7000-8000-000000020000" },
+  "3": { v200g: "01960003-0000-7000-8000-000000010000", v600g: "01960003-0000-7000-8000-000000020000" },
+  "4": { v200g: "01960004-0000-7000-8000-000000010000", v600g: "01960004-0000-7000-8000-000000020000" },
+};
 
 function makeRewards(slotId: string, price200g: number, price600g: number): Reward[] {
+  const ids = VARIANT_IDS[slotId]!;
   return [
     {
       id: `${slotId}_r1`,
       label: "200g",
       price: price200g,
       description: "200g 단일 원두 + 디지털 브루잉 가이드",
-      variantId: mockVariantId(slotId, 1),
+      variantId: ids.v200g,
       optionValues: [{ optionType: "용량", value: "200g" }],
     },
     {
@@ -453,7 +455,7 @@ function makeRewards(slotId: string, price200g: number, price600g: number): Rewa
       label: "600g",
       price: price600g,
       description: "600g 단일 원두 + 핸드라이팅 테이스팅 노트",
-      variantId: mockVariantId(slotId, 2),
+      variantId: ids.v600g,
       optionValues: [{ optionType: "용량", value: "600g" }],
     },
   ];
