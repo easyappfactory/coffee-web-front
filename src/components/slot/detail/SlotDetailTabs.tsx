@@ -39,6 +39,7 @@ export function SlotDetailTabs({ slot, slotId }: SlotDetailTabsProps) {
     setSlotTitle,
     setSlotThumbnail,
     setMasterName,
+    quantity,
   } = useCheckoutStore()
 
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>("스토리")
@@ -96,7 +97,7 @@ export function SlotDetailTabs({ slot, slotId }: SlotDetailTabsProps) {
     if (!activeReward) return
     setIsOrdering(true)
     try {
-      const { orderId } = await reservePayment(SERVICE_ID, activeReward.planId)
+      const { orderId } = await reservePayment(SERVICE_ID, activeReward.variantId, quantity)
       setOrderId(orderId)
       setStoreReward(activeReward)
       setAmount(activeReward.price)
@@ -280,6 +281,18 @@ export function SlotDetailTabs({ slot, slotId }: SlotDetailTabsProps) {
                               </span>
                             )}
                           </div>
+                          {r.optionValues.length > 0 && (
+                            <div className="mb-[3px] flex flex-wrap gap-1">
+                              {r.optionValues.map((ov) => (
+                                <span
+                                  key={`${ov.optionType}-${ov.value}`}
+                                  className="rounded-pill bg-brand/[0.07] px-2 py-0.5 text-[10px] font-medium text-brand"
+                                >
+                                  {ov.optionType}: {ov.value}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                           <p className="text-[12px] text-ink-muted">{r.description}</p>
                         </div>
                         <span className="font-display text-base font-extrabold text-brand">

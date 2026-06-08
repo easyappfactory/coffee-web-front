@@ -6,8 +6,8 @@ export function useCheckout() {
   const { setOrderId, setStep } = useCheckoutStore();
 
   const placeOrder = useMutation({
-    mutationFn: ({ serviceId, planId }: { serviceId: string; planId: number }) =>
-      reservePayment(serviceId, planId),
+    mutationFn: ({ serviceId, variantId, quantity }: { serviceId: string; variantId: string; quantity: number }) =>
+      reservePayment(serviceId, variantId, quantity),
     onSuccess: ({ orderId }) => {
       setOrderId(orderId);
       setStep("payment");

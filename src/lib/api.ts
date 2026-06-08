@@ -42,9 +42,10 @@ const PAY_PREFIX = process.env.NEXT_PUBLIC_PAY_API_PREFIX ?? "/api/v1/bs";
 
 export async function reservePayment(
   serviceId: string,
-  planId: number
+  variantId: string,
+  quantity: number
 ): Promise<{ orderId: string }> {
-  const res = await apiClient.post(`${PAY_PREFIX}/pay/reserve`, { serviceId, planId });
+  const res = await apiClient.post(`${PAY_PREFIX}/pay/reserve`, { serviceId, variantId, quantity });
   return res.data.data;
 }
 

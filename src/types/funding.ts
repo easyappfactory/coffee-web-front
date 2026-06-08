@@ -1,10 +1,16 @@
+export interface OptionValueDto {
+  optionType: string;  // e.g. "용량"
+  value: string;       // e.g. "250g"
+}
+
 export interface Reward {
   id: string;
   label: string;
   price: number;
   description: string;
   remaining?: number;
-  planId: number;
+  variantId: string;           // product_variant.id (결제 시 사용할 key)
+  optionValues: OptionValueDto[];  // 옵션 정보
 }
 
 export interface FundingStatus {
@@ -22,7 +28,8 @@ export interface Order {
   slotThumbnail: string;
   masterName?: string;
   masterRole?: string;
-  rewardId: string;
+  variantId: string;
+  optionSummary: string;
   rewardLabel: string;
   rewardDescription?: string;
   quantity: number;
