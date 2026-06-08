@@ -100,7 +100,7 @@ function CheckoutCompleteContent() {
           <div className="divide-y divide-border">
             {(
               [
-                { label: "주문번호", val: result.orderId },
+                { label: "주문번호", val: result.publicOrderNumber },
                 { label: "슬롯", val: result.orderName || slotTitle || "-" },
                 { label: "리워드", val: selectedReward?.label ?? "-" },
                 {

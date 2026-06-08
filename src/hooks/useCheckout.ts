@@ -3,13 +3,14 @@ import { reservePayment } from "@/lib/api";
 import { useCheckoutStore } from "@/store/checkoutStore";
 
 export function useCheckout() {
-  const { setOrderId, setAmount, setStep } = useCheckoutStore();
+  const { setOrderId, setPublicOrderNumber, setAmount, setStep } = useCheckoutStore();
 
   const placeOrder = useMutation({
     mutationFn: ({ serviceId, variantId, quantity }: { serviceId: string; variantId: string; quantity: number }) =>
       reservePayment(serviceId, variantId, quantity),
-    onSuccess: ({ orderId, amount }) => {
+    onSuccess: ({ orderId, publicOrderNumber, amount }) => {
       setOrderId(orderId);
+      setPublicOrderNumber(publicOrderNumber);
       setAmount(amount);
       setStep("payment");
     },
