@@ -13,6 +13,8 @@ interface CheckoutStore {
   setStep: (step: CheckoutStep) => void
   orderId: string | null
   setOrderId: (id: string) => void
+  publicOrderNumber: string | null
+  setPublicOrderNumber: (num: string) => void
 
   // 결제 연동용 필드
   amount: number
@@ -42,6 +44,8 @@ export const useCheckoutStore = create<CheckoutStore>()(
       setStep: (step) => set({ step }),
       orderId: null,
       setOrderId: (id) => set({ orderId: id }),
+      publicOrderNumber: null,
+      setPublicOrderNumber: (num) => set({ publicOrderNumber: num }),
 
       amount: 0,
       setAmount: (amount) => set({ amount }),
@@ -62,6 +66,7 @@ export const useCheckoutStore = create<CheckoutStore>()(
           quantity: 1,
           step: "order",
           orderId: null,
+          publicOrderNumber: null,
           amount: 0,
           orderName: "",
           slotId: null,
@@ -77,6 +82,7 @@ export const useCheckoutStore = create<CheckoutStore>()(
         selectedReward: state.selectedReward,
         quantity: state.quantity,
         orderId: state.orderId,
+        publicOrderNumber: state.publicOrderNumber,
         amount: state.amount,
         orderName: state.orderName,
         slotId: state.slotId,
