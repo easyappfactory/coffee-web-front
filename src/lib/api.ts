@@ -46,7 +46,7 @@ export async function reservePayment(
   variantId: string,
   quantity: number
 ): Promise<{ orderId: string; amount: number }> {
-  const res = await apiClient.post(`${PAY_PREFIX}/checkout/reserve`, { serviceId, variantId, quantity });
+  const res = await apiClient.post(`${PAY_PREFIX}/order/reserve`, { serviceId, variantId, quantity });
   return res.data.data;
 }
 
@@ -60,7 +60,7 @@ export async function confirmPayment(
   amount: number;
   status: string;
 }> {
-  const res = await apiClient.post(`${PAY_PREFIX}/checkout/confirm`, { paymentKey, orderId, amount });
+  const res = await apiClient.post(`${PAY_PREFIX}/order/confirm`, { paymentKey, orderId, amount });
   return res.data.data;
 }
 
