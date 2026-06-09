@@ -11,13 +11,22 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import axios from "axios";
 
+type CommunityQuery = ReturnType<typeof useCommunityPosts>;
+
 interface PostFeedProps {
   productId: string;
   currentUserId: string;
   isManager: boolean;
+  prefetchedQuery?: CommunityQuery;
 }
 
-export function PostFeed({ productId, currentUserId, isManager }: PostFeedProps) {
+export function PostFeed({
+  productId,
+  currentUserId,
+  isManager,
+  prefetchedQuery,
+}: PostFeedProps) {
+  const ownQuery = useCommunityPosts(productId);
   const {
     posts,
     isLoading,
@@ -29,7 +38,7 @@ export function PostFeed({ productId, currentUserId, isManager }: PostFeedProps)
     createPost,
     deletePost,
     toggleLike,
-  } = useCommunityPosts(productId);
+  } = prefetchedQuery ?? ownQuery;
 
   const [expandedPostId, setExpandedPostId] = useState<string | null>(null);
 
