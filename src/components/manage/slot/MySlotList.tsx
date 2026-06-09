@@ -1,12 +1,13 @@
 "use client"
 
-import { useSlots } from "@/hooks/useSlots"
+import { useMySlots } from "@/hooks/useSlots"
 import { SlotCard } from "@/components/slot/feed/SlotCard"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Package } from "lucide-react"
 
 export function MySlotList() {
-  const { data: slots, isLoading } = useSlots()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: slots, isLoading } = useMySlots() as { data: any[]; isLoading: boolean }
 
   if (isLoading) {
     return (
