@@ -1,11 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { RadarChart } from "./RadarChart"
 import { FlavorBars } from "./FlavorBars"
 import { RoastingLevel } from "./RoastingLevel"
 import { useFunding } from "@/hooks/useFunding"
+import { useCommunityPosts } from "@/hooks/useCommunityPosts"
 import { reservePayment, POC_USERS } from "@/lib/api"
 import { useCheckoutStore } from "@/store/checkoutStore"
 import { Button } from "@/components/ui/button"
@@ -46,6 +47,16 @@ export function SlotDetailTabs({ slot, slotId }: SlotDetailTabsProps) {
   const [isOrdering, setIsOrdering] = useState(false)
 
   const { data: fundingData } = useFunding(slotId)
+
+  // 상세 페이지 진입 시 커뮤니티 데이터 미리 fetch (탭 전환 시 재요청 방지)
+  const currentUserId = useMemo(
+    () =>
+      typeof window !== "undefined"
+        ? (localStorage.getItem("pocUserId") ?? POC_USERS.USER)
+        : POC_USERS.USER,
+    [],
+  )
+  const communityQuery = useCommunityPosts(slotId)
 
   const funding = fundingData?.funding
   const rewards = fundingData?.rewards ?? []
@@ -301,8 +312,9 @@ export function SlotDetailTabs({ slot, slotId }: SlotDetailTabsProps) {
         {activeTab === "커뮤니티" && (
           <PostFeed
             productId={slotId}
-            currentUserId={typeof window !== "undefined" ? (localStorage.getItem("pocUserId") ?? POC_USERS.USER) : POC_USERS.USER}
+            currentUserId={currentUserId}
             isManager={false}
+            prefetchedQuery={communityQuery}
           />
         )}
       </div>

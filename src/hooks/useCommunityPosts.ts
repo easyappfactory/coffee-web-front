@@ -22,6 +22,7 @@ export function useCommunityPosts(productId: string) {
     getNextPageParam: (lastPage) =>
       lastPage.hasNext ? lastPage.nextCursor : undefined,
     enabled: !!productId,
+    staleTime: 1000 * 60 * 5,
   });
 
   const posts = postsQuery.data?.pages.flatMap((page) => page.items) ?? [];
