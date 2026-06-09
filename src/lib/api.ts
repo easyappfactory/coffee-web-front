@@ -147,4 +147,15 @@ export async function toggleFollow(masterId: string): Promise<{ following: boole
   return res.data;
 }
 
+export async function createSlot(
+  data: import("@/types/slotRegistration").CreateSlotRequest,
+): Promise<import("@/types/slotRegistration").CreateSlotResponse> {
+  if (USE_MOCK) {
+    await delay(500);
+    return { id: `slot_${Date.now()}`, createdAt: new Date().toISOString() };
+  }
+  const res = await apiClient.post("/api/slots", data);
+  return res.data;
+}
+
 

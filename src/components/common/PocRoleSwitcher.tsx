@@ -18,7 +18,11 @@ export function PocRoleSwitcher() {
     const selected = e.target.value;
     setRole(selected);
     localStorage.setItem("pocUserId", POC_USERS[selected]);
-    window.location.reload();
+    if (selected === "MANAGER") {
+      window.location.href = "/manage/slots";
+    } else {
+      window.location.href = "/feed";
+    }
   }
 
   return (

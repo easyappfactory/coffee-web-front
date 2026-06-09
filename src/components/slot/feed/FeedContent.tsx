@@ -1,31 +1,31 @@
-"use client";
+"use client"
 
-import { Skeleton } from "@/components/ui/skeleton";
-import { FeaturedSlot } from "./FeaturedSlot";
-import { SlotCarousel } from "./SlotCarousel";
-import { useSlots } from "@/hooks/useSlots";
-import { useFeedStore } from "@/store/feedStore";
+import { Skeleton } from "@/components/ui/skeleton"
+import { FeaturedSlot } from "./FeaturedSlot"
+import { SlotCarousel } from "./SlotCarousel"
+import { useSlots } from "@/hooks/useSlots"
+import { useFeedStore } from "@/store/feedStore"
 
 export function FeedContent() {
-  const { data: slots, isLoading } = useSlots();
-  const { activeCategory } = useFeedStore();
+  const { data: slots, isLoading } = useSlots()
+  const { activeCategory } = useFeedStore()
 
   const sortedSlots = slots
     ? [...slots].sort((a, b) => {
-        if (!a.createdAt || !b.createdAt) return 0;
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        if (!a.createdAt || !b.createdAt) return 0
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       })
-    : [];
+    : []
 
-  const filteredSlots =
-    sortedSlots.filter((s) => activeCategory === "전체" || s.category === activeCategory);
+  const filteredSlots = sortedSlots.filter(
+    (s) => activeCategory === "전체" || s.category === activeCategory,
+  )
 
-  const featuredSlot = sortedSlots[0];
+  const featuredSlot = sortedSlots[0]
 
   if (isLoading) {
     return (
       <div className="space-y-10">
-        {/* Featured skeleton */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
@@ -43,14 +43,13 @@ export function FeedContent() {
           </div>
         </div>
 
-        {/* Carousel skeleton */}
         <div className="flex gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-[220px] w-[240px] shrink-0 rounded-card" />
           ))}
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -65,5 +64,5 @@ export function FeedContent() {
         <SlotCarousel slots={filteredSlots} />
       </section>
     </div>
-  );
+  )
 }
