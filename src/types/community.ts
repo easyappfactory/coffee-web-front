@@ -8,6 +8,7 @@ export interface Post {
   commentCount: number;
   isLiked: boolean;
   isHidden: boolean;
+  isMaster: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -25,6 +26,7 @@ export interface CommunityComment {
   content: string;
   parentComment: ParentCommentPreview | null;
   isHidden: boolean;
+  isMaster: boolean;
   createdAt: string;
 }
 

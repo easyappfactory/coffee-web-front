@@ -45,12 +45,20 @@ export function CommentItem({
       {/* Header */}
       <div className="mb-1.5 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-brand/20 font-display text-[10px] font-bold text-brand">
+          <div className={cn(
+            "flex h-6 w-6 items-center justify-center rounded-full font-display text-[10px] font-bold",
+            comment.isMaster ? "bg-brand text-white ring-2 ring-brand/30" : "bg-brand/20 text-brand"
+          )}>
             {comment.authorId.slice(-2).toUpperCase()}
           </div>
           <span className="text-[12px] font-semibold text-ink-1">
             {comment.authorId.slice(-8)}
           </span>
+          {comment.isMaster && (
+            <span className="rounded-pill bg-brand/10 px-1.5 py-0.5 text-[9px] font-bold text-brand">
+              Master
+            </span>
+          )}
           <span className="text-[10px] text-ink-muted">{relativeTime}</span>
         </div>
         <div className="flex items-center gap-1">

@@ -40,13 +40,21 @@ export function PostCard({
       {/* Header */}
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand font-display text-[12px] font-bold text-white">
+          <div className={cn(
+            "flex h-8 w-8 items-center justify-center rounded-full font-display text-[12px] font-bold text-white",
+            post.isMaster ? "bg-brand ring-2 ring-brand/30" : "bg-brand"
+          )}>
             {post.authorId.slice(-2).toUpperCase()}
           </div>
           <div>
             <span className="text-[13px] font-semibold text-ink-1">
               {post.authorId.slice(-8)}
             </span>
+            {post.isMaster && (
+              <span className="rounded-pill bg-brand/10 px-2 py-0.5 text-[10px] font-bold text-brand">
+                Master
+              </span>
+            )}
             <span className="ml-2 text-[11px] text-ink-muted">{relativeTime}</span>
           </div>
         </div>
