@@ -11,6 +11,8 @@ export interface PricingOption {
   earlybird: number
   second: number
   final: number
+  minQuantity: number
+  maxQuantity: number
 }
 
 export interface SlotRegistrationFormData {
@@ -20,6 +22,7 @@ export interface SlotRegistrationFormData {
   thumbnailFile: FileList | null
   flavor: SlotFlavorInput
   pricingOptions: PricingOption[]
+  deadline: string
 }
 
 export interface CreateSlotRequest {
@@ -28,6 +31,7 @@ export interface CreateSlotRequest {
   hashtags: string[]
   flavor: SlotFlavorInput
   pricingOptions: Omit<PricingOption, "id">[]
+  deadline: string
 }
 
 export interface CreateSlotResponse {
