@@ -3,7 +3,6 @@
 import Image from "next/image"
 import Link from "next/link"
 import { ExternalLink, Pencil } from "lucide-react"
-import { cn } from "@/lib/utils"
 import { Progress } from "@/components/ui/progress"
 import { CommunityBadge } from "./CommunityBadge"
 import type { ManagerSlot } from "@/lib/mock/manager"
@@ -13,15 +12,11 @@ interface ManagerSlotCardProps {
 }
 
 export function ManagerSlotCard({ slot }: ManagerSlotCardProps) {
-  const hasUnread = slot.community.hasUnread
+  const { newComments, newVotes, newLikes } = slot.community
+  const hasCommunityUpdates = newComments > 0 || newVotes > 0 || newLikes > 0
 
   return (
-    <div
-      className={cn(
-        "group relative overflow-hidden rounded-2xl border bg-white transition-all hover:shadow-md",
-        hasUnread ? "border-l-[3px] border-l-blue-500 border-t-border border-r-border border-b-border" : "border-border",
-      )}
-    >
+    <div className="group relative overflow-hidden rounded-2xl border border-border bg-white transition-all hover:shadow-md">
       {/* Thumbnail */}
       <div className="relative aspect-[16/10] overflow-hidden bg-gray-light">
         <Image
@@ -64,12 +59,12 @@ export function ManagerSlotCard({ slot }: ManagerSlotCardProps) {
         </div>
 
         {/* Community Updates */}
-        {hasUnread && (
-          <div className="rounded-lg bg-blue-50/60 px-3 py-2">
+        {hasCommunityUpdates && (
+          <div className="rounded-lg bg-gray-light px-3 py-2">
             <CommunityBadge
-              newComments={slot.community.newComments}
-              newVotes={slot.community.newVotes}
-              newLikes={slot.community.newLikes}
+              newComments={newComments}
+              newVotes={newVotes}
+              newLikes={newLikes}
             />
           </div>
         )}
