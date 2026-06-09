@@ -51,6 +51,8 @@ export function useCommunityPosts(productId: string) {
   return {
     posts,
     isLoading: postsQuery.isLoading,
+    isError: postsQuery.isError,
+    error: postsQuery.error,
     hasNextPage: postsQuery.hasNextPage,
     fetchNextPage: postsQuery.fetchNextPage,
     isFetchingNextPage: postsQuery.isFetchingNextPage,
