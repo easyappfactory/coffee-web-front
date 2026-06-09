@@ -158,4 +158,149 @@ export async function createSlot(
   return res.data;
 }
 
+// ── Community API ────────────────────────────────────────────────────────────
 
+import type {
+  Post,
+  CommunityComment,
+  CreatePostRequest,
+  UpdatePostRequest,
+  CreateCommentRequest,
+  LikeToggleResponse,
+  PresignedUrlResponse,
+} from "@/types/community";
+
+export async function getCommunityPosts(
+  productId: string,
+  cursor?: string,
+  size: number = 20
+): Promise<{ items: Post[]; nextCursor: string | null; hasNext: boolean }> {
+  const params = new URLSearchParams({ size: String(size) });
+  if (cursor) params.set("cursor", cursor);
+  const res = await apiClient.get(
+    `/internal-api/v1/community/${productId}/posts?${params}`
+  );
+  return res.data.data ?? res.data;
+}
+
+export async function createCommunityPost(
+  productId: string,
+  request: CreatePostRequest
+): Promise<Post> {
+  const res = await apiClient.post(
+    `/internal-api/v1/community/${productId}/posts`,
+    request
+  );
+  return res.data.data;
+}
+
+export async function updateCommunityPost(
+  productId: string,
+  postId: string,
+  request: UpdatePostRequest
+): Promise<Post> {
+  const res = await apiClient.put(
+    `/internal-api/v1/community/${productId}/posts/${postId}`,
+    request
+  );
+  return res.data.data;
+}
+
+export async function deleteCommunityPost(
+  productId: string,
+  postId: string
+): Promise<void> {
+  await apiClient.delete(
+    `/internal-api/v1/community/${productId}/posts/${postId}`
+  );
+}
+
+export async function togglePostLike(
+  productId: string,
+  postId: string
+): Promise<LikeToggleResponse> {
+  const res = await apiClient.post(
+    `/internal-api/v1/community/${productId}/posts/${postId}/like`
+  );
+  return res.data.data;
+}
+
+export async function getCommunityComments(
+  productId: string,
+  postId: string,
+  size: number = 50
+): Promise<{ comments: CommunityComment[] }> {
+  const res = await apiClient.get(
+    `/internal-api/v1/community/${productId}/posts/${postId}/comments?size=${size}`
+  );
+  return res.data.data;
+}
+
+export async function createCommunityComment(
+  productId: string,
+  postId: string,
+  request: CreateCommentRequest
+): Promise<CommunityComment> {
+  const res = await apiClient.post(
+    `/internal-api/v1/community/${productId}/posts/${postId}/comments`,
+    request
+  );
+  return res.data.data;
+}
+
+export async function deleteCommunityComment(
+  productId: string,
+  postId: string,
+  commentId: string
+): Promise<void> {
+  await apiClient.delete(
+    `/internal-api/v1/community/${productId}/posts/${postId}/comments/${commentId}`
+  );
+}
+
+// ── Moderation API ───────────────────────────────────────────────────────────
+
+export async function hidePost(productId: string, postId: string): Promise<void> {
+  await apiClient.post(
+    `/internal-api/v1/community/${productId}/posts/${postId}/hide`
+  );
+}
+
+export async function unhidePost(productId: string, postId: string): Promise<void> {
+  await apiClient.post(
+    `/internal-api/v1/community/${productId}/posts/${postId}/unhide`
+  );
+}
+
+export async function hideComment(
+  productId: string,
+  postId: string,
+  commentId: string
+): Promise<void> {
+  await apiClient.post(
+    `/internal-api/v1/community/${productId}/posts/${postId}/comments/${commentId}/hide`
+  );
+}
+
+export async function unhideComment(
+  productId: string,
+  postId: string,
+  commentId: string
+): Promise<void> {
+  await apiClient.post(
+    `/internal-api/v1/community/${productId}/posts/${postId}/comments/${commentId}/unhide`
+  );
+}
+
+// ── Image Upload API ─────────────────────────────────────────────────────────
+
+export async function getPresignedUrl(
+  fileName: string,
+  contentType: string
+): Promise<PresignedUrlResponse> {
+  const res = await apiClient.post("/internal-api/v1/images/presigned-url", {
+    fileName,
+    contentType,
+  });
+  return res.data.data;
+}
