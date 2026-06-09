@@ -36,25 +36,32 @@ export function SlotRegistrationForm() {
           earlybird: 12000,
           second: 14500,
           final: 18000,
+          minQuantity: 1,
+          maxQuantity: 10,
         },
       ],
+      deadline: "",
     },
   })
 
   const blendName = methods.watch("blendName") ?? ""
   const blendStory = methods.watch("blendStory") ?? ""
   const pricingOptions = methods.watch("pricingOptions") ?? []
+  const deadline = methods.watch("deadline") ?? ""
 
   const isFormReady =
     blendName.trim().length > 0 &&
     blendStory.trim().length > 0 &&
+    deadline.trim().length > 0 &&
     pricingOptions.length > 0 &&
     pricingOptions.every(
       (opt) =>
         (opt.weight ?? "").trim().length > 0 &&
         Number(opt.earlybird) > 0 &&
         Number(opt.second) > 0 &&
-        Number(opt.final) > 0,
+        Number(opt.final) > 0 &&
+        Number(opt.minQuantity) > 0 &&
+        Number(opt.maxQuantity) >= Number(opt.minQuantity),
     )
 
   function onSubmit(data: SlotRegistrationFormData) {
@@ -64,11 +71,14 @@ export function SlotRegistrationForm() {
         blendStory: data.blendStory,
         hashtags: data.hashtags,
         flavor: data.flavor,
+        deadline: data.deadline,
         pricingOptions: data.pricingOptions.map((opt) => ({
           weight: opt.weight,
           earlybird: opt.earlybird,
           second: opt.second,
           final: opt.final,
+          minQuantity: opt.minQuantity,
+          maxQuantity: opt.maxQuantity,
         })),
       },
       {

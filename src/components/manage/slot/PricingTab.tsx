@@ -15,6 +15,20 @@ export function PricingTab() {
 
   return (
     <div>
+      {/* 슬롯 마감일 */}
+      <div className="mb-6">
+        <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-ink-muted">
+          슬롯 마감일
+        </label>
+        <Input
+          type="date"
+          value={watch("deadline")}
+          onChange={(e) => setValue("deadline", e.target.value)}
+          className="h-10 w-60 rounded-lg border border-border bg-white px-3"
+          min={new Date().toISOString().split("T")[0]}
+        />
+      </div>
+
       <div className="overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
         <table className="w-full text-left">
           <thead>
@@ -30,6 +44,12 @@ export function PricingTab() {
               </th>
               <th className="p-4 text-xs font-bold uppercase tracking-widest text-ink-muted">
                 최종 정가
+              </th>
+              <th className="p-4 text-xs font-bold uppercase tracking-widest text-ink-muted">
+                최소 수량
+              </th>
+              <th className="p-4 text-xs font-bold uppercase tracking-widest text-ink-muted">
+                최대 수량
               </th>
               <th className="w-12 p-4" />
             </tr>
@@ -92,6 +112,30 @@ export function PricingTab() {
                     className="h-10 rounded-lg border border-border bg-white px-3 text-ink-2"
                   />
                 </td>
+                <td className="p-3">
+                  <Input
+                    type="number"
+                    value={watch(`pricingOptions.${index}.minQuantity`)}
+                    onChange={(e) =>
+                      setValue(`pricingOptions.${index}.minQuantity`, Number(e.target.value))
+                    }
+                    placeholder="1"
+                    min={1}
+                    className="h-10 w-20 rounded-lg border border-border bg-white px-3"
+                  />
+                </td>
+                <td className="p-3">
+                  <Input
+                    type="number"
+                    value={watch(`pricingOptions.${index}.maxQuantity`)}
+                    onChange={(e) =>
+                      setValue(`pricingOptions.${index}.maxQuantity`, Number(e.target.value))
+                    }
+                    placeholder="10"
+                    min={1}
+                    className="h-10 w-20 rounded-lg border border-border bg-white px-3"
+                  />
+                </td>
                 <td className="p-3 text-center">
                   <button
                     type="button"
@@ -106,7 +150,7 @@ export function PricingTab() {
             {fields.length === 0 && (
               <tr>
                 <td
-                  colSpan={5}
+                  colSpan={7}
                   className="p-8 text-center text-sm text-ink-muted"
                 >
                   아직 가격 옵션이 없습니다. 아래 버튼으로 추가하세요.
@@ -128,6 +172,8 @@ export function PricingTab() {
               earlybird: 0,
               second: 0,
               final: 0,
+              minQuantity: 1,
+              maxQuantity: 10,
             })
           }
           className="gap-2"

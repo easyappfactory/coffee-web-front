@@ -1,19 +1,19 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { RadarChart } from "./RadarChart"
 import { FlavorBars } from "./FlavorBars"
 import { RoastingLevel } from "./RoastingLevel"
 import { useFunding } from "@/hooks/useFunding"
-import { useComments } from "@/hooks/useComments"
-import { toggleLike, votePoll, reservePayment } from "@/lib/api"
+import { reservePayment, POC_USERS } from "@/lib/api"
 import { useCheckoutStore } from "@/store/checkoutStore"
 import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
-import { Heart, Share2, BarChart2, Loader2 } from "lucide-react"
+import { Loader2 } from "lucide-react"
+import { PostFeed } from "@/components/community/PostFeed"
 import type { SlotDetail } from "@/types/slot"
+import type { useCommunityPosts } from "@/hooks/useCommunityPosts"
 
 const TABS = ["스토리", "플레이버", "펀딩", "커뮤니티"] as const
 
@@ -23,12 +23,15 @@ function formatKRW(n: number) {
   return `${(n / 10000).toFixed(0)}만원`
 }
 
+type CommunityQuery = ReturnType<typeof useCommunityPosts>
+
 interface SlotDetailTabsProps {
   slot: SlotDetail
   slotId: string
+  communityQuery: CommunityQuery
 }
 
-export function SlotDetailTabs({ slot, slotId }: SlotDetailTabsProps) {
+export function SlotDetailTabs({ slot, slotId, communityQuery }: SlotDetailTabsProps) {
   const router = useRouter()
   const {
     setOrderId,
@@ -43,53 +46,24 @@ export function SlotDetailTabs({ slot, slotId }: SlotDetailTabsProps) {
   } = useCheckoutStore()
 
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>("스토리")
-  const [liked, setLiked] = useState(slot.isLiked ?? false)
-  const [likeCount, setLikeCount] = useState(slot.likes)
   const [selectedReward, setSelectedReward] = useState<string | null>(null)
-  const [pollVoted, setPollVoted] = useState<string | null>(slot.poll?.myVote ?? null)
-  const [pollOptions, setPollOptions] = useState(slot.poll?.options ?? [])
   const [isOrdering, setIsOrdering] = useState(false)
 
   const { data: fundingData } = useFunding(slotId)
-  const { comments, postComment, isPending } = useComments(slotId)
-  const [commentText, setCommentText] = useState("")
+
+  const currentUserId = useMemo(
+    () =>
+      typeof window !== "undefined"
+        ? (localStorage.getItem("pocUserId") ?? POC_USERS.USER)
+        : POC_USERS.USER,
+    [],
+  )
 
   const funding = fundingData?.funding
   const rewards = fundingData?.rewards ?? []
   const activeRewardId = selectedReward ?? rewards[0]?.id
   const activeReward = rewards.find((r) => r.id === activeRewardId)
   const accent = slot.accentColor ?? "#75584d"
-  const totalPollVotes = pollOptions.reduce((s, o) => s + o.votes, 0)
-
-  async function handleLike() {
-    setLiked((p) => !p)
-    setLikeCount((p) => (liked ? p - 1 : p + 1))
-    try {
-      await toggleLike(slotId)
-    } catch {
-      setLiked((p) => !p)
-      setLikeCount((p) => (liked ? p + 1 : p - 1))
-    }
-  }
-
-  async function handleVote(optionId: string) {
-    if (pollVoted) return
-    setPollVoted(optionId)
-    setPollOptions((prev) =>
-      prev.map((o) => (o.id === optionId ? { ...o, votes: o.votes + 1 } : o))
-    )
-    try {
-      await votePoll(slotId, optionId)
-    } catch {
-      // optimistic — leave as-is on mock
-    }
-  }
-
-  async function handleCommentSubmit() {
-    if (!commentText.trim()) return
-    await postComment(commentText.trim())
-    setCommentText("")
-  }
 
   const SERVICE_ID = "SRV_001"
 
@@ -337,156 +311,12 @@ export function SlotDetailTabs({ slot, slotId }: SlotDetailTabsProps) {
 
         {/* ── 커뮤니티 ── */}
         {activeTab === "커뮤니티" && (
-          <div>
-            {/* like + share */}
-            <div className="mb-7 flex gap-2.5">
-              <Button
-                variant="outline"
-                onClick={handleLike}
-                className={cn(
-                  "rounded-pill font-display font-semibold transition-all",
-                  liked && "border-red-400 bg-red-50 text-red-500 hover:bg-red-50 hover:text-red-500"
-                )}
-              >
-                <Heart className={cn("mr-1.5 h-4 w-4", liked && "fill-red-500 text-red-500")} />
-                {likeCount.toLocaleString()}
-              </Button>
-              <Button variant="outline" className="rounded-pill font-display font-semibold">
-                <Share2 className="mr-1.5 h-4 w-4" />
-                공유하기
-              </Button>
-            </div>
-
-            {/* poll */}
-            {slot.poll && (
-              <div className="mb-7 rounded-card border border-border bg-card p-6">
-                <div className="mb-4 flex items-center gap-2">
-                  <BarChart2 className="h-3.5 w-3.5 text-brand" />
-                  <h3 className="font-display text-sm font-bold text-ink-1">
-                    {slot.poll.question}
-                  </h3>
-                </div>
-                <div className="flex flex-col gap-2">
-                  {pollOptions.map((opt) => {
-                    const pct =
-                      totalPollVotes > 0
-                        ? Math.round((opt.votes / totalPollVotes) * 100)
-                        : 0
-                    const voted = pollVoted === opt.id
-                    return (
-                      <div
-                        key={opt.id}
-                        onClick={() => handleVote(opt.id)}
-                        className={cn(
-                          "relative overflow-hidden rounded-inner border px-3.5 py-3 transition-colors",
-                          voted ? "border-brand" : "border-border",
-                          !pollVoted && "cursor-pointer hover:border-brand/40"
-                        )}
-                      >
-                        {/* fill bar */}
-                        {pollVoted && (
-                          <div
-                            className={cn(
-                              "absolute inset-0 rounded-inner transition-[width] duration-700",
-                              voted ? "bg-brand/12" : "bg-border/50"
-                            )}
-                            style={{ width: `${pct}%` }}
-                          />
-                        )}
-                        <div className="relative flex items-center justify-between">
-                          <span
-                            className={cn(
-                              "text-[13px]",
-                              voted ? "font-bold text-brand" : "font-medium text-ink-2"
-                            )}
-                          >
-                            {opt.label}
-                          </span>
-                          {pollVoted && (
-                            <span
-                              className={cn(
-                                "font-display text-[12px] font-bold",
-                                voted ? "text-brand" : "text-ink-muted"
-                              )}
-                            >
-                              {pct}%
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-                <p className="mt-2.5 text-[11px] text-ink-muted">
-                  총 {totalPollVotes.toLocaleString()}명 참여
-                </p>
-              </div>
-            )}
-
-            {/* comment input */}
-            <div className="mb-5 rounded-card border border-border bg-card p-4">
-              <Textarea
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                placeholder="이 원두에 대한 이야기를 나눠보세요..."
-                className="min-h-[80px] resize-none border-0 bg-transparent p-0 text-sm leading-[1.7] text-ink-1 placeholder:text-ink-muted focus-visible:ring-0"
-              />
-              <div className="mt-2.5 flex justify-end">
-                <Button
-                  size="sm"
-                  onClick={handleCommentSubmit}
-                  disabled={!commentText.trim() || isPending}
-                  className="rounded-pill font-display text-[12px] font-semibold"
-                  variant={commentText.trim() ? "default" : "secondary"}
-                >
-                  등록
-                </Button>
-              </div>
-            </div>
-
-            {/* comments */}
-            <div className="flex flex-col gap-3">
-              {comments.length === 0 && (
-                <p className="py-10 text-center text-sm text-ink-muted">
-                  첫 번째 댓글을 남겨보세요
-                </p>
-              )}
-              {comments.map((c) => {
-                const avatarColor = c.userColor ?? "#75584d"
-                const displayName = c.author.name
-                const relativeTime =
-                  c.time ?? new Date(c.createdAt).toLocaleDateString("ko-KR")
-                return (
-                  <div
-                    key={c.id}
-                    className="rounded-card border border-border bg-card p-4"
-                  >
-                    <div className="mb-2.5 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="flex h-7 w-7 items-center justify-center rounded-full font-display text-[11px] font-bold text-white"
-                          style={{ background: avatarColor }}
-                        >
-                          {displayName[0]?.toUpperCase()}
-                        </div>
-                        <span className="text-[13px] font-semibold text-ink-1">
-                          {displayName}
-                        </span>
-                      </div>
-                      <span className="text-[11px] text-ink-muted">{relativeTime}</span>
-                    </div>
-                    <p className="text-sm leading-[1.7] text-ink-2">{c.content}</p>
-                    <div className="mt-2.5">
-                      <button className="flex items-center gap-1 text-[12px] font-medium text-ink-muted hover:text-ink-2">
-                        <Heart className="h-3 w-3" />
-                        {c.likes ?? 0}
-                      </button>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
+          <PostFeed
+            productId={slotId}
+            currentUserId={currentUserId}
+            isManager={false}
+            communityQuery={communityQuery}
+          />
         )}
       </div>
     </div>
