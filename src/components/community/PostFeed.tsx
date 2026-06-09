@@ -52,9 +52,22 @@ export function PostFeed({ productId, currentUserId, isManager }: PostFeedProps)
     await unhidePostApi(productId, postId);
   }
 
-  // 403 → 잠금 오버레이
-  if (isError && axios.isAxiosError(error) && error.response?.status === 403) {
+  // 403 → 잠금 오버레이, CORS/네트워크 에러(응답 없음) 포함
+  if (
+    isError &&
+    axios.isAxiosError(error) &&
+    (error.response?.status === 403 || !error.response)
+  ) {
     return <CommunityLock />;
+  }
+
+  // 그 외 서버 에러
+  if (isError) {
+    return (
+      <p className="py-10 text-center text-sm text-ink-muted">
+        커뮤니티를 불러올 수 없습니다
+      </p>
+    );
   }
 
   if (isLoading) {
