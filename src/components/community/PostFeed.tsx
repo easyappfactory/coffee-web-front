@@ -1,32 +1,31 @@
-"use client";
+"use client"
 
-import { useState, useCallback } from "react";
-import { PostComposer } from "./PostComposer";
-import { PostCard } from "./PostCard";
-import { CommentSection } from "./CommentSection";
-import { CommunityLock } from "./CommunityLock";
-import { useCommunityPosts } from "@/hooks/useCommunityPosts";
-import { hidePost as hidePostApi, unhidePost as unhidePostApi } from "@/lib/api";
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import axios from "axios";
+import { useState, useCallback } from "react"
+import { PostComposer } from "./PostComposer"
+import { PostCard } from "./PostCard"
+import { CommentSection } from "./CommentSection"
+import { CommunityLock } from "./CommunityLock"
+import { hidePost as hidePostApi, unhidePost as unhidePostApi } from "@/lib/api"
+import { Button } from "@/components/ui/button"
+import { Loader2 } from "lucide-react"
+import axios from "axios"
+import type { useCommunityPosts } from "@/hooks/useCommunityPosts"
 
-type CommunityQuery = ReturnType<typeof useCommunityPosts>;
+type CommunityQuery = ReturnType<typeof useCommunityPosts>
 
 interface PostFeedProps {
-  productId: string;
-  currentUserId: string;
-  isManager: boolean;
-  prefetchedQuery?: CommunityQuery;
+  productId: string
+  currentUserId: string
+  isManager: boolean
+  communityQuery: CommunityQuery
 }
 
 export function PostFeed({
   productId,
   currentUserId,
   isManager,
-  prefetchedQuery,
+  communityQuery,
 }: PostFeedProps) {
-  const ownQuery = useCommunityPosts(productId);
   const {
     posts,
     isLoading,
@@ -38,27 +37,27 @@ export function PostFeed({
     createPost,
     deletePost,
     toggleLike,
-  } = prefetchedQuery ?? ownQuery;
+  } = communityQuery
 
-  const [expandedPostId, setExpandedPostId] = useState<string | null>(null);
+  const [expandedPostId, setExpandedPostId] = useState<string | null>(null)
 
   const handleCreatePost = useCallback(
     async (content: string, imageUrls: string[]) => {
-      await createPost.mutateAsync({ content, imageUrls });
+      await createPost.mutateAsync({ content, imageUrls })
     },
-    [createPost]
-  );
+    [createPost],
+  )
 
   const handleToggleComments = useCallback((postId: string) => {
-    setExpandedPostId((prev) => (prev === postId ? null : postId));
-  }, []);
+    setExpandedPostId((prev) => (prev === postId ? null : postId))
+  }, [])
 
   async function handleHidePost(postId: string) {
-    await hidePostApi(productId, postId);
+    await hidePostApi(productId, postId)
   }
 
   async function handleUnhidePost(postId: string) {
-    await unhidePostApi(productId, postId);
+    await unhidePostApi(productId, postId)
   }
 
   // 403 → 잠금 오버레이, CORS/네트워크 에러(응답 없음) 포함
@@ -67,7 +66,7 @@ export function PostFeed({
     axios.isAxiosError(error) &&
     (error.response?.status === 403 || !error.response)
   ) {
-    return <CommunityLock />;
+    return <CommunityLock />
   }
 
   // 그 외 서버 에러
@@ -76,7 +75,7 @@ export function PostFeed({
       <p className="py-10 text-center text-sm text-ink-muted">
         커뮤니티를 불러올 수 없습니다
       </p>
-    );
+    )
   }
 
   if (isLoading) {
@@ -84,7 +83,7 @@ export function PostFeed({
       <div className="py-16 text-center text-ink-muted">
         <Loader2 className="mx-auto h-5 w-5 animate-spin" />
       </div>
-    );
+    )
   }
 
   return (
@@ -137,5 +136,5 @@ export function PostFeed({
         </div>
       )}
     </div>
-  );
+  )
 }
