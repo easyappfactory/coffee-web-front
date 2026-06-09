@@ -3,15 +3,12 @@
 import { Skeleton } from "@/components/ui/skeleton"
 import { FeaturedSlot } from "./FeaturedSlot"
 import { SlotCarousel } from "./SlotCarousel"
-import { ManagerFeedTabs } from "./ManagerFeedTabs"
 import { useSlots } from "@/hooks/useSlots"
 import { useFeedStore } from "@/store/feedStore"
-import { usePocRole } from "@/hooks/usePocRole"
 
 export function FeedContent() {
   const { data: slots, isLoading } = useSlots()
   const { activeCategory } = useFeedStore()
-  const { isManager } = usePocRole()
 
   const sortedSlots = slots
     ? [...slots].sort((a, b) => {
@@ -53,10 +50,6 @@ export function FeedContent() {
         </div>
       </div>
     )
-  }
-
-  if (isManager) {
-    return <ManagerFeedTabs />
   }
 
   return (
