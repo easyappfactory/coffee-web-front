@@ -9,11 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import type { SlotRegistrationFormData } from "@/types/slotRegistration"
 
 export function StoryTab() {
-  const {
-    register,
-    watch,
-    setValue,
-  } = useFormContext<SlotRegistrationFormData>()
+  const { watch, setValue } = useFormContext<SlotRegistrationFormData>()
 
   const [tagInput, setTagInput] = useState("")
   const hashtags = watch("hashtags")
@@ -50,7 +46,8 @@ export function StoryTab() {
             블렌드 이름
           </label>
           <Input
-            {...register("blendName", { required: true })}
+            value={watch("blendName")}
+            onChange={(e) => setValue("blendName", e.target.value)}
             placeholder="예: 새벽의 숲 (Dawn Forest)"
             className="border-0 border-b border-border bg-transparent text-2xl font-display focus-visible:ring-0"
           />
@@ -61,7 +58,8 @@ export function StoryTab() {
             블렌딩 이야기
           </label>
           <Textarea
-            {...register("blendStory", { required: true })}
+            value={watch("blendStory")}
+            onChange={(e) => setValue("blendStory", e.target.value)}
             placeholder="이 커피가 만들어지기까지의 여정을 기록해주세요..."
             rows={6}
             className="resize-none border-0 border-b border-border bg-transparent text-lg focus-visible:ring-0"
@@ -124,11 +122,11 @@ export function StoryTab() {
             </>
           )}
           <input
-            {...register("thumbnailFile")}
             ref={fileInputRef}
             type="file"
             accept="image/*"
             className="hidden"
+            onChange={(e) => setValue("thumbnailFile", e.target.files)}
           />
         </div>
       </div>

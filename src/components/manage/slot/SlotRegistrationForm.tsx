@@ -4,7 +4,6 @@ import { useState } from "react"
 import { useForm, FormProvider } from "react-hook-form"
 import { BookOpen, Coffee, CreditCard } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
 import { StoryTab } from "./StoryTab"
 import { FlavorTab } from "./FlavorTab"
 import { PricingTab } from "./PricingTab"
@@ -42,6 +41,22 @@ export function SlotRegistrationForm() {
     },
   })
 
+  const blendName = methods.watch("blendName") ?? ""
+  const blendStory = methods.watch("blendStory") ?? ""
+  const pricingOptions = methods.watch("pricingOptions") ?? []
+
+  const isFormReady =
+    blendName.trim().length > 0 &&
+    blendStory.trim().length > 0 &&
+    pricingOptions.length > 0 &&
+    pricingOptions.every(
+      (opt) =>
+        (opt.weight ?? "").trim().length > 0 &&
+        Number(opt.earlybird) > 0 &&
+        Number(opt.second) > 0 &&
+        Number(opt.final) > 0,
+    )
+
   function onSubmit(data: SlotRegistrationFormData) {
     mutate(
       {
@@ -68,16 +83,37 @@ export function SlotRegistrationForm() {
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onSubmit)}>
-        <div className="mb-10">
-          <h3 className="mb-2 font-display text-2xl font-extrabold tracking-tight text-ink-1">
-            신규 블렌드 등록
-          </h3>
-          <p className="text-sm text-ink-muted">
-            최고의 원두 이야기를 세상에 들려주세요.
-          </p>
+        {/* 고정 헤더: 타이틀 + 버튼 */}
+        <div className="mb-10 flex items-start justify-between">
+          <div>
+            <h3 className="mb-2 font-display text-2xl font-extrabold tracking-tight text-ink-1">
+              신규 블렌드 등록
+            </h3>
+            <p className="text-sm text-ink-muted">
+              최고의 원두 이야기를 세상에 들려주세요.
+            </p>
+          </div>
+          {isFormReady && !isPending ? (
+            <div className="animate-border-spin shrink-0 rounded-xl p-[2px]">
+              <button
+                type="submit"
+                className="relative rounded-[10px] bg-brand px-10 py-3 text-sm font-bold text-white transition-all active:scale-[0.97]"
+              >
+                {isPending ? "등록 중..." : "블렌드 등록"}
+              </button>
+            </div>
+          ) : (
+            <button
+              type="submit"
+              disabled
+              className="shrink-0 cursor-not-allowed rounded-xl border border-border bg-surface px-10 py-3 text-sm font-bold text-brand/40"
+            >
+              블렌드 등록
+            </button>
+          )}
         </div>
 
-        {/* Form Sub-Tabs */}
+        {/* 고정 탭 바 */}
         <div className="mb-8 flex gap-10 border-b border-border pb-px">
           {FORM_TABS.map(({ id, label, icon: Icon }) => (
             <button
@@ -97,22 +133,17 @@ export function SlotRegistrationForm() {
           ))}
         </div>
 
-        {/* Tab Content */}
-        <div className="min-h-[400px]">
-          {activeTab === "story" && <StoryTab />}
-          {activeTab === "flavor" && <FlavorTab />}
-          {activeTab === "pricing" && <PricingTab />}
-        </div>
-
-        {/* Submit */}
-        <div className="mt-10 flex justify-end">
-          <Button
-            type="submit"
-            disabled={isPending}
-            className="bg-brand px-8 py-3 text-white hover:bg-brand-dark"
-          >
-            {isPending ? "등록 중..." : "블렌드 등록"}
-          </Button>
+        {/* 탭 콘텐츠 — CSS hidden으로 마운트 유지 */}
+        <div>
+          <div className={activeTab !== "story" ? "hidden" : undefined}>
+            <StoryTab />
+          </div>
+          <div className={activeTab !== "flavor" ? "hidden" : undefined}>
+            <FlavorTab />
+          </div>
+          <div className={activeTab !== "pricing" ? "hidden" : undefined}>
+            <PricingTab />
+          </div>
         </div>
       </form>
     </FormProvider>

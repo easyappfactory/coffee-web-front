@@ -60,6 +60,33 @@
   }
 }
 
+/* Spinning border animation for submit button */
+.animate-border-spin {
+  position: relative;
+  overflow: hidden;
+}
+
+.animate-border-spin::before {
+  content: "";
+  position: absolute;
+  inset: -200%;
+  background: conic-gradient(
+    from 0deg,
+    #5b4137 0%,
+    #c4a882 25%,
+    #fff 50%,
+    #c4a882 75%,
+    #5b4137 100%
+  );
+  animation: border-spin 2s linear infinite;
+}
+
+@keyframes border-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

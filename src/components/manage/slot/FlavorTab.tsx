@@ -47,7 +47,7 @@ export function FlavorTab() {
                   step={1}
                   value={field.value}
                   onChange={(e) => field.onChange(Number(e.target.value))}
-                  className="h-1 w-full cursor-pointer appearance-none rounded-full bg-gray-light accent-brand"
+                  className="h-2 w-full cursor-pointer appearance-none rounded-full bg-brand/20 accent-brand"
                 />
               </div>
             )}

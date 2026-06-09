@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import type { SlotRegistrationFormData } from "@/types/slotRegistration"
 
 export function PricingTab() {
-  const { register, control } = useFormContext<SlotRegistrationFormData>()
+  const { control, watch, setValue } = useFormContext<SlotRegistrationFormData>()
   const { fields, append, remove } = useFieldArray({
     control,
     name: "pricingOptions",
@@ -42,37 +42,52 @@ export function PricingTab() {
               >
                 <td className="p-3">
                   <Input
-                    {...register(`pricingOptions.${index}.weight`)}
+                    value={watch(`pricingOptions.${index}.weight`)}
+                    onChange={(e) =>
+                      setValue(`pricingOptions.${index}.weight`, e.target.value)
+                    }
                     placeholder="예: 200g"
                     className="h-10 rounded-lg border border-border bg-white px-3 font-bold"
                   />
                 </td>
                 <td className="p-3">
                   <Input
-                    {...register(`pricingOptions.${index}.earlybird`, {
-                      valueAsNumber: true,
-                    })}
                     type="number"
+                    value={watch(`pricingOptions.${index}.earlybird`)}
+                    onChange={(e) =>
+                      setValue(
+                        `pricingOptions.${index}.earlybird`,
+                        Number(e.target.value),
+                      )
+                    }
                     placeholder="12000"
                     className="h-10 rounded-lg border border-border bg-white px-3 text-brand"
                   />
                 </td>
                 <td className="p-3">
                   <Input
-                    {...register(`pricingOptions.${index}.second`, {
-                      valueAsNumber: true,
-                    })}
                     type="number"
+                    value={watch(`pricingOptions.${index}.second`)}
+                    onChange={(e) =>
+                      setValue(
+                        `pricingOptions.${index}.second`,
+                        Number(e.target.value),
+                      )
+                    }
                     placeholder="14500"
                     className="h-10 rounded-lg border border-border bg-white px-3"
                   />
                 </td>
                 <td className="p-3">
                   <Input
-                    {...register(`pricingOptions.${index}.final`, {
-                      valueAsNumber: true,
-                    })}
                     type="number"
+                    value={watch(`pricingOptions.${index}.final`)}
+                    onChange={(e) =>
+                      setValue(
+                        `pricingOptions.${index}.final`,
+                        Number(e.target.value),
+                      )
+                    }
                     placeholder="18000"
                     className="h-10 rounded-lg border border-border bg-white px-3 text-ink-2"
                   />
