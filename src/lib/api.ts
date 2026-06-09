@@ -1,16 +1,11 @@
 import axios from "axios";
 import {
-  mockSlots,
-  mockSlotDetail,
-  mockSlotDetails,
   mockSlotFundingData,
   mockMaster,
 } from "./mock/slots";
-import type { Slot, SlotDetail } from "@/types/slot";
+import type { SlotDetail } from "@/types/slot";
 import type { FundingStatus, Reward } from "@/types/funding";
 import type { Master } from "@/types/user";
-
-const USE_MOCK = false;
 
 export const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080",
@@ -36,16 +31,18 @@ export const POC_USERS: Record<string, string> = {
   SYSTEM_MANAGER: "01966a00-0000-7000-8000-000000000004",
 };
 
-// ── 결제 API (게이트웨이 경유, USE_MOCK 무시) ────────────────────────────────
+// ── API Prefix (게이트웨이에서 주입: /api/v1/bs → /internal-api/v1/) ──────────
 
-const PAY_PREFIX = process.env.NEXT_PUBLIC_PAY_API_PREFIX ?? "/api/v1/bs";
+const API_PREFIX = process.env.NEXT_PUBLIC_API_PREFIX!;
+
+// ── 결제 API ────────────────────────────────────────────────────────────────
 
 export async function reservePayment(
   serviceId: string,
   variantId: string,
   quantity: number
 ): Promise<{ orderId: string; publicOrderNumber: string; amount: number }> {
-  const res = await apiClient.post(`${PAY_PREFIX}/order/reserve`, { serviceId, variantId, quantity });
+  const res = await apiClient.post(`${API_PREFIX}/order/reserve`, { serviceId, variantId, quantity });
   return res.data.data;
 }
 
@@ -61,7 +58,7 @@ export async function confirmPayment(
   status: string;
   paymentKey: string;
 }> {
-  const res = await apiClient.post(`${PAY_PREFIX}/order/confirm`, { paymentKey, orderId, amount });
+  const res = await apiClient.post(`${API_PREFIX}/order/confirm`, { paymentKey, orderId, amount });
   return res.data.data;
 }
 
@@ -69,93 +66,105 @@ function delay(ms = 300) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export async function getSlots(): Promise<Slot[]> {
-  if (USE_MOCK) {
-    await delay();
-    return mockSlots;
-  }
-  const res = await apiClient.get<Slot[]>("/api/slots");
+// ── Slot API ────────────────────────────────────────────────────────────────
+
+export interface SlotSummary {
+  id: string;
+  title: string;
+  excerpt: string;
+  thumbnailUrl: string | null;
+  deadline: string;
+  status: string;
+  supporters: number;
+  variants: { id: string; variantCode: string; price: number; stock: number; availableStock: number }[];
+  createdAt: string;
+}
+
+export async function getSlots(
+  cursor?: string,
+  size: number = 20,
+): Promise<{ items: SlotSummary[]; nextCursor: string | null; hasNext: boolean }> {
+  const params = new URLSearchParams({ size: String(size) });
+  if (cursor) params.set("cursor", cursor);
+  const res = await apiClient.get(`${API_PREFIX}/slots?${params}`);
   return res.data;
 }
 
 export async function getSlotDetail(id: string): Promise<SlotDetail> {
-  if (USE_MOCK) {
-    await delay();
-    return mockSlotDetails[id] ?? mockSlotDetail;
-  }
-  const res = await apiClient.get<SlotDetail>(`/api/slots/${id}`);
-  return res.data;
+  const res = await apiClient.get(`${API_PREFIX}/slots/${id}`);
+  return res.data.data;
 }
 
-export async function getMaster(id: string): Promise<Master> {
-  if (USE_MOCK) {
-    await delay();
-    return { ...mockMaster, slotsCount: mockMaster.slotCount, totalFunding: mockMaster.totalFunding };
-  }
-  const res = await apiClient.get<Master>(`/api/masters/${id}`);
-  return res.data;
+// 아래는 아직 백엔드 미구현 → mock 유지
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
+export async function getMaster(_id: string): Promise<Master> {
+  await delay();
+  return { ...mockMaster, slotsCount: mockMaster.slotCount, totalFunding: mockMaster.totalFunding };
 }
 
 export async function getSlotFunding(
-  id: string
+  id: string,
 ): Promise<{ funding: FundingStatus; rewards: Reward[] }> {
-  if (USE_MOCK) {
-    await delay();
-    const data = mockSlotFundingData[id];
-    if (!data) throw new Error(`funding data not found for slot: ${id}`);
-    return data;
-  }
-  const res = await apiClient.get(`/api/slots/${id}/funding`);
-  return res.data;
+  await delay();
+  const data = mockSlotFundingData[id];
+  if (!data) throw new Error(`funding data not found for slot: ${id}`);
+  return data;
 }
 
-export async function toggleLike(slotId: string): Promise<{ liked: boolean; count: number }> {
-  if (USE_MOCK) {
-    await delay(150);
-    return { liked: true, count: 2848 };
-  }
-  const res = await apiClient.post(`/api/slots/${slotId}/likes`);
-  return res.data;
+export async function toggleLike(
+  _slotId: string,
+): Promise<{ liked: boolean; count: number }> {
+  await delay(150);
+  return { liked: true, count: 2848 };
 }
 
-export async function postComment(
-  slotId: string,
-  content: string
-): Promise<{ id: string; createdAt: string }> {
-  if (USE_MOCK) {
-    await delay(200);
-    return { id: `c_${Date.now()}`, createdAt: new Date().toISOString() };
-  }
-  const res = await apiClient.post(`/api/slots/${slotId}/comments`, { content });
-  return res.data;
+export async function votePoll(
+  _slotId: string,
+  _optionId: string,
+): Promise<void> {
+  await delay(150);
 }
 
-export async function votePoll(slotId: string, optionId: string): Promise<void> {
-  if (USE_MOCK) {
-    await delay(150);
-    return;
-  }
-  await apiClient.post(`/api/slots/${slotId}/poll/vote`, { optionId });
+export async function toggleFollow(
+  _masterId: string,
+): Promise<{ following: boolean }> {
+  await delay(150);
+  return { following: true };
 }
 
-export async function toggleFollow(masterId: string): Promise<{ following: boolean }> {
-  if (USE_MOCK) {
-    await delay(150);
-    return { following: true };
-  }
-  const res = await apiClient.post(`/api/masters/${masterId}/follow`);
-  return res.data;
-}
+/* eslint-enable @typescript-eslint/no-unused-vars */
 
 export async function createSlot(
   data: import("@/types/slotRegistration").CreateSlotRequest,
 ): Promise<import("@/types/slotRegistration").CreateSlotResponse> {
-  if (USE_MOCK) {
-    await delay(500);
-    return { id: `slot_${Date.now()}`, createdAt: new Date().toISOString() };
-  }
-  const res = await apiClient.post("/api/slots", data);
-  return res.data;
+  const body = {
+    story: {
+      title: data.blendName,
+      excerpt: data.blendStory.slice(0, 100),
+      description: data.blendStory,
+      hashtags: data.hashtags,
+      thumbnailUrl: null,
+    },
+    flavor: {
+      fruity: 0, floral: 0, sweet: 0, nutty: 0, earthy: 0,
+      aroma: data.flavor.aroma * 20,
+      body: data.flavor.body * 20,
+      sweetness: data.flavor.sweetness * 20,
+      acidity: data.flavor.acidity * 20,
+      roastLevel: 3,
+    },
+    deadline: data.deadline,
+    variants: data.pricingOptions.map((opt) => ({
+      variantCode: opt.weight,
+      price: opt.earlybird,
+      stock: 100,
+      minQuantity: opt.minQuantity,
+      maxQuantity: opt.maxQuantity,
+    })),
+  };
+  const res = await apiClient.post(`${API_PREFIX}/slots`, body);
+  return { id: res.data.data.slotId, createdAt: new Date().toISOString() };
 }
 
 // ── Community API ────────────────────────────────────────────────────────────
@@ -178,7 +187,7 @@ export async function getCommunityPosts(
   const params = new URLSearchParams({ size: String(size) });
   if (cursor) params.set("cursor", cursor);
   const res = await apiClient.get(
-    `/internal-api/v1/community/${productId}/posts?${params}`
+    `${API_PREFIX}/community/${productId}/posts?${params}`
   );
   return res.data.data ?? res.data;
 }
@@ -188,7 +197,7 @@ export async function createCommunityPost(
   request: CreatePostRequest
 ): Promise<Post> {
   const res = await apiClient.post(
-    `/internal-api/v1/community/${productId}/posts`,
+    `${API_PREFIX}/community/${productId}/posts`,
     request
   );
   return res.data.data;
@@ -200,7 +209,7 @@ export async function updateCommunityPost(
   request: UpdatePostRequest
 ): Promise<Post> {
   const res = await apiClient.put(
-    `/internal-api/v1/community/${productId}/posts/${postId}`,
+    `${API_PREFIX}/community/${productId}/posts/${postId}`,
     request
   );
   return res.data.data;
@@ -211,7 +220,7 @@ export async function deleteCommunityPost(
   postId: string
 ): Promise<void> {
   await apiClient.delete(
-    `/internal-api/v1/community/${productId}/posts/${postId}`
+    `${API_PREFIX}/community/${productId}/posts/${postId}`
   );
 }
 
@@ -220,7 +229,7 @@ export async function togglePostLike(
   postId: string
 ): Promise<LikeToggleResponse> {
   const res = await apiClient.post(
-    `/internal-api/v1/community/${productId}/posts/${postId}/like`
+    `${API_PREFIX}/community/${productId}/posts/${postId}/like`
   );
   return res.data.data;
 }
@@ -231,7 +240,7 @@ export async function getCommunityComments(
   size: number = 50
 ): Promise<{ comments: CommunityComment[] }> {
   const res = await apiClient.get(
-    `/internal-api/v1/community/${productId}/posts/${postId}/comments?size=${size}`
+    `${API_PREFIX}/community/${productId}/posts/${postId}/comments?size=${size}`
   );
   return res.data.data;
 }
@@ -242,7 +251,7 @@ export async function createCommunityComment(
   request: CreateCommentRequest
 ): Promise<CommunityComment> {
   const res = await apiClient.post(
-    `/internal-api/v1/community/${productId}/posts/${postId}/comments`,
+    `${API_PREFIX}/community/${productId}/posts/${postId}/comments`,
     request
   );
   return res.data.data;
@@ -254,7 +263,7 @@ export async function deleteCommunityComment(
   commentId: string
 ): Promise<void> {
   await apiClient.delete(
-    `/internal-api/v1/community/${productId}/posts/${postId}/comments/${commentId}`
+    `${API_PREFIX}/community/${productId}/posts/${postId}/comments/${commentId}`
   );
 }
 
@@ -262,13 +271,13 @@ export async function deleteCommunityComment(
 
 export async function hidePost(productId: string, postId: string): Promise<void> {
   await apiClient.post(
-    `/internal-api/v1/community/${productId}/posts/${postId}/hide`
+    `${API_PREFIX}/community/${productId}/posts/${postId}/hide`
   );
 }
 
 export async function unhidePost(productId: string, postId: string): Promise<void> {
   await apiClient.post(
-    `/internal-api/v1/community/${productId}/posts/${postId}/unhide`
+    `${API_PREFIX}/community/${productId}/posts/${postId}/unhide`
   );
 }
 
@@ -278,7 +287,7 @@ export async function hideComment(
   commentId: string
 ): Promise<void> {
   await apiClient.post(
-    `/internal-api/v1/community/${productId}/posts/${postId}/comments/${commentId}/hide`
+    `${API_PREFIX}/community/${productId}/posts/${postId}/comments/${commentId}/hide`
   );
 }
 
@@ -288,7 +297,7 @@ export async function unhideComment(
   commentId: string
 ): Promise<void> {
   await apiClient.post(
-    `/internal-api/v1/community/${productId}/posts/${postId}/comments/${commentId}/unhide`
+    `${API_PREFIX}/community/${productId}/posts/${postId}/comments/${commentId}/unhide`
   );
 }
 
@@ -298,7 +307,7 @@ export async function getPresignedUrl(
   fileName: string,
   contentType: string
 ): Promise<PresignedUrlResponse> {
-  const res = await apiClient.post("/internal-api/v1/images/presigned-url", {
+  const res = await apiClient.post(`${API_PREFIX}/images/presigned-url`, {
     fileName,
     contentType,
   });
