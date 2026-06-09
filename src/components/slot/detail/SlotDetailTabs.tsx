@@ -6,7 +6,6 @@ import { RadarChart } from "./RadarChart"
 import { FlavorBars } from "./FlavorBars"
 import { RoastingLevel } from "./RoastingLevel"
 import { useFunding } from "@/hooks/useFunding"
-import { useCommunityPosts } from "@/hooks/useCommunityPosts"
 import { reservePayment, POC_USERS } from "@/lib/api"
 import { useCheckoutStore } from "@/store/checkoutStore"
 import { Button } from "@/components/ui/button"
@@ -14,6 +13,7 @@ import { cn } from "@/lib/utils"
 import { Loader2 } from "lucide-react"
 import { PostFeed } from "@/components/community/PostFeed"
 import type { SlotDetail } from "@/types/slot"
+import type { useCommunityPosts } from "@/hooks/useCommunityPosts"
 
 const TABS = ["스토리", "플레이버", "펀딩", "커뮤니티"] as const
 
@@ -23,12 +23,15 @@ function formatKRW(n: number) {
   return `${(n / 10000).toFixed(0)}만원`
 }
 
+type CommunityQuery = ReturnType<typeof useCommunityPosts>
+
 interface SlotDetailTabsProps {
   slot: SlotDetail
   slotId: string
+  communityQuery: CommunityQuery
 }
 
-export function SlotDetailTabs({ slot, slotId }: SlotDetailTabsProps) {
+export function SlotDetailTabs({ slot, slotId, communityQuery }: SlotDetailTabsProps) {
   const router = useRouter()
   const {
     setOrderId,
@@ -48,7 +51,6 @@ export function SlotDetailTabs({ slot, slotId }: SlotDetailTabsProps) {
 
   const { data: fundingData } = useFunding(slotId)
 
-  // 상세 페이지 진입 시 커뮤니티 데이터 미리 fetch (탭 전환 시 재요청 방지)
   const currentUserId = useMemo(
     () =>
       typeof window !== "undefined"
@@ -56,7 +58,6 @@ export function SlotDetailTabs({ slot, slotId }: SlotDetailTabsProps) {
         : POC_USERS.USER,
     [],
   )
-  const communityQuery = useCommunityPosts(slotId)
 
   const funding = fundingData?.funding
   const rewards = fundingData?.rewards ?? []
@@ -314,7 +315,7 @@ export function SlotDetailTabs({ slot, slotId }: SlotDetailTabsProps) {
             productId={slotId}
             currentUserId={currentUserId}
             isManager={false}
-            prefetchedQuery={communityQuery}
+            communityQuery={communityQuery}
           />
         )}
       </div>

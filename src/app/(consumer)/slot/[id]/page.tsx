@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { VideoPlayer } from "@/components/slot/feed/VideoPlayer"
 import { useSlotDetail } from "@/hooks/useSlotDetail"
 import { useFunding } from "@/hooks/useFunding"
+import { useCommunityPosts } from "@/hooks/useCommunityPosts"
 import { MasterProfileSidebar } from "@/components/slot/detail/MasterProfileSidebar"
 import { SlotDetailTabs } from "@/components/slot/detail/SlotDetailTabs"
 
@@ -17,6 +18,10 @@ export default function SlotDetailPage({ params }: PageProps) {
   const { id } = params
   const { data: slot, isLoading } = useSlotDetail(id)
   const { data: fundingData } = useFunding(id)
+
+  // TODO: 실제 slot API 연결 후, slot 로드 완료 뒤 순차 호출하도록 enabled 조건 추가
+  // 현재는 페이지 진입 시 바로 호출 (mock 환경)
+  const communityQuery = useCommunityPosts(id)
 
   if (isLoading || !slot) {
     return (
@@ -96,7 +101,7 @@ export default function SlotDetailPage({ params }: PageProps) {
             </div>
 
             {/* tabs + content */}
-            <SlotDetailTabs slot={slot} slotId={id} />
+            <SlotDetailTabs slot={slot} slotId={id} communityQuery={communityQuery} />
           </div>
         </div>
       </div>
