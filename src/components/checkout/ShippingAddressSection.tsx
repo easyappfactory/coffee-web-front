@@ -8,6 +8,12 @@ import { Button } from "@/components/ui/button"
 import { Loader2, MapPin, Pencil } from "lucide-react"
 import type { ShippingAddress } from "@/types/shipping"
 
+function formatPhone(digits: string): string {
+  if (digits.length <= 3) return digits
+  if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`
+  return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`
+}
+
 export function ShippingAddressSection() {
   const {
     shippingAddress,
@@ -222,9 +228,10 @@ export function ShippingAddressSection() {
             <div>
               <label className="mb-1 block text-[12px] font-medium text-ink-muted">연락처</label>
               <input
-                value={receiverPhone}
-                onChange={(e) => setReceiverPhone(e.target.value)}
-                placeholder="010-0000-0000"
+                value={formatPhone(receiverPhone)}
+                onChange={(e) => setReceiverPhone(e.target.value.replace(/\D/g, "").slice(0, 11))}
+                inputMode="numeric"
+                placeholder="01012345678"
                 className="w-full rounded-inner border border-border bg-white px-3 py-2.5 text-[13px] text-ink-1 outline-none focus:border-brand"
               />
             </div>
