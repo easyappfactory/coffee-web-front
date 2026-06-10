@@ -98,6 +98,59 @@ Work tasks are tracked in `~/practice/coffee-web/project-docs/Tasks/` following 
 
 Mobile responsive, login/signup UI, my-page, real PG payment integration, image upload for comments, and automated tests are explicitly out of scope for v1.0.
 
+## Defensive coding (필수 준수)
+
+모든 코드 작성 및 수정 시 아래 방어적 코드 규칙을 반드시 적용할 것. `TypeError: Cannot read properties of undefined` 류의 런타임 에러를 사전에 방지하기 위함.
+
+### Null Safety & Optional Chaining
+- 객체 프로퍼티(예: `obj.id`, `obj.name`)에 접근할 때 해당 객체가 `undefined`/`null`일 수 있으면 반드시 Optional Chaining(`?.`)을 사용하거나, 접근 전에 존재 여부를 검증할 것.
+- API 응답 데이터를 매핑할 때 `res.data.data?.id` 식으로 안전하게 접근할 것.
+
+```tsx
+// Bad
+return <div>{user.id}</div>
+
+// Good — Optional Chaining
+return <div>{user?.id}</div>
+
+// Good — Early Return
+if (!user) return <div>로딩 중...</div>
+return <div>{user.id}</div>
+```
+
+### Asynchronous Data Handling
+- React Query 등 비동기 데이터를 사용하는 컴포넌트에서는 `isLoading`, `!data`, `isError` 상태를 **모두** 처리할 것. `isLoading || !data`만 체크하고 에러 상태를 무시하지 말 것.
+- 자식 컴포넌트에 비동기 데이터를 props로 전달할 때, 데이터가 확정된 이후에만 렌더링하도록 조건부 렌더링(Conditional Rendering)을 적용할 것.
+
+```tsx
+// Bad — 에러 상태 무시
+if (isLoading || !data) return <Loading />
+return <Child data={data} />
+
+// Good — 에러 상태까지 처리
+if (isLoading || !data) return <Loading />
+if (isError) return <ErrorFallback />
+return <Child data={data} />
+```
+
+### Array & List Safety
+- 배열을 `.map()`, `.find()`, `.filter()` 등으로 순회할 때, 배열 자체가 유효한지(`Array.isArray()` 또는 `??  []`) 사전 검증할 것.
+- 배열 내부 요소가 `null`/`undefined`일 수 있으면 순회 내부에서 guard 처리할 것.
+
+```tsx
+// Bad
+{items.map(item => <div key={item.id}>{item.name}</div>)}
+
+// Good
+{(items ?? []).map(item => {
+  if (!item) return null
+  return <div key={item.id}>{item.name}</div>
+})}
+```
+
+### Component Props 안전성
+- 자식 컴포넌트가 받는 props 객체의 중첩 프로퍼티(예: `slot.master.name`)에 접근할 때, 중간 객체가 `undefined`일 가능성을 고려하여 Optional Chaining 또는 기본값(default parameter)을 적용할 것.
+
 ## Code style
 
 Prettier enforces: no semicolons, double quotes, 2-space indent, 80-col width, Tailwind class sorting. Run `npm run format` before committing.
