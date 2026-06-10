@@ -1,8 +1,6 @@
 import axios from "axios";
 import {
   mockSlots,
-  mockSlotDetail,
-  mockSlotDetails,
   mockSlotFundingData,
   mockMaster,
 } from "./mock/slots";
@@ -75,8 +73,8 @@ export async function getSlots(): Promise<Slot[]> {
 }
 
 export async function getSlotDetail(id: string): Promise<SlotDetail> {
-  await delay();
-  return mockSlotDetails[id] ?? mockSlotDetail;
+  const res = await apiClient.get(`${API_PREFIX}/slots/${id}`);
+  return res.data.data;
 }
 
 export async function createSlot(
