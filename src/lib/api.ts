@@ -21,7 +21,7 @@ apiClient.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
     const userId = localStorage.getItem("pocUserId") ?? POC_USERS.USER;
     config.headers["X-User-Id"] = userId;
-    config.headers["X-Service-Id"] = "brewing-society";
+    config.headers["X-Service-Id"] = process.env.NEXT_PUBLIC_SERVICE_ID!;
   }
   return config;
 });
