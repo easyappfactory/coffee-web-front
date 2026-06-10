@@ -25,7 +25,7 @@ export function useCommunityPosts(productId: string) {
     staleTime: 1000 * 60 * 5,
   });
 
-  const posts = postsQuery.data?.pages.flatMap((page) => page.items) ?? [];
+  const posts = postsQuery.data?.pages.flatMap((page) => page.items ?? []) ?? [];
 
   const createPost = useMutation({
     mutationFn: (request: CreatePostRequest) =>

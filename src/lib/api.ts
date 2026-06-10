@@ -166,7 +166,8 @@ export async function getCommunityPosts(
   const res = await apiClient.get(
     `${API_PREFIX}/community/${productId}/posts?${params}`
   );
-  return res.data.data ?? res.data;
+  const { data: items, meta } = res.data;
+  return { items: items ?? [], nextCursor: meta?.nextCursor ?? null, hasNext: meta?.hasNext ?? false };
 }
 
 export async function createCommunityPost(
