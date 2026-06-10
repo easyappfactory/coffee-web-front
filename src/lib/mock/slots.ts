@@ -1,6 +1,14 @@
 import type { Slot, SlotDetail, Comment, Poll, FlavorProfile } from "@/types/slot";
 import type { FundingStatus, Reward } from "@/types/funding";
 
+// Mock 슬롯 UUID (POC용)
+export const SLOT_IDS = {
+  SLOT_1: "01960001-0000-7000-8000-000000000001",
+  SLOT_2: "01960002-0000-7000-8000-000000000002",
+  SLOT_3: "01960003-0000-7000-8000-000000000003",
+  SLOT_4: "01960004-0000-7000-8000-000000000004",
+} as const;
+
 export interface MasterProfile {
   id: string;
   name: string;
@@ -28,7 +36,7 @@ export const mockMasterProfiles: Record<string, MasterProfile> = {
     totalFunding: 127,
     isFollowing: false,
     recentSlots: [
-      { id: "1", title: "에티오피아 아나에어로빅 네추럴", thumbnailColor: "#2d1f1a", accentColor: "#c4824a", percent: 127 },
+      { id: SLOT_IDS.SLOT_1, title: "에티오피아 아나에어로빅 네추럴", thumbnailColor: "#2d1f1a", accentColor: "#c4824a", percent: 127 },
     ],
   },
   m2: {
@@ -43,7 +51,7 @@ export const mockMasterProfiles: Record<string, MasterProfile> = {
     totalFunding: 85,
     isFollowing: false,
     recentSlots: [
-      { id: "2", title: "케냐 AA 게이샤 : 아프리카의 보석", thumbnailColor: "#1a2533", accentColor: "#6a9fc8", percent: 85 },
+      { id: SLOT_IDS.SLOT_2, title: "케냐 AA 게이샤 : 아프리카의 보석", thumbnailColor: "#1a2533", accentColor: "#6a9fc8", percent: 85 },
     ],
   },
   m3: {
@@ -58,7 +66,7 @@ export const mockMasterProfiles: Record<string, MasterProfile> = {
     totalFunding: 92,
     isFollowing: false,
     recentSlots: [
-      { id: "3", title: "파나마 게이샤 워시드 : 꽃향기의 정점", thumbnailColor: "#1f1a2a", accentColor: "#9a7ac0", percent: 85 },
+      { id: SLOT_IDS.SLOT_3, title: "파나마 게이샤 워시드 : 꽃향기의 정점", thumbnailColor: "#1f1a2a", accentColor: "#9a7ac0", percent: 85 },
     ],
   },
   m4: {
@@ -73,7 +81,7 @@ export const mockMasterProfiles: Record<string, MasterProfile> = {
     totalFunding: 78,
     isFollowing: false,
     recentSlots: [
-      { id: "4", title: "콜롬비아 핑크 버번 : 달콤한 반란", thumbnailColor: "#1f1a0f", accentColor: "#d4a84b", percent: 78 },
+      { id: SLOT_IDS.SLOT_4, title: "콜롬비아 핑크 버번 : 달콤한 반란", thumbnailColor: "#1f1a0f", accentColor: "#d4a84b", percent: 78 },
     ],
   },
 };
@@ -98,7 +106,7 @@ export const mockMaster = {
 
 export const mockSlots: Slot[] = [
   {
-    id: "1",
+    id: SLOT_IDS.SLOT_1,
     title: "에티오피아 아나에어로빅 네추럴 : 산소의 마법",
     series: "Limited Reserve Series",
     category: "BEANS",
@@ -118,7 +126,7 @@ export const mockSlots: Slot[] = [
       "에티오피아 예가체프 지역에서 생산된 아나에어로빅 발효 방식의 네추럴 원두. 산소를 차단한 밀폐 탱크에서 발효되어 독특한 와인 같은 풍미와 복합적인 과일 향이 발달합니다.",
   },
   {
-    id: "2",
+    id: SLOT_IDS.SLOT_2,
     title: "케냐 AA 게이샤 : 아프리카의 보석",
     series: "Origin Discovery",
     category: "BREWING",
@@ -136,7 +144,7 @@ export const mockSlots: Slot[] = [
     excerpt: "케냐 AA 등급 게이샤 품종의 섬세한 플로럴 향과 베리류의 산미가 복합적으로 어우러지는 고산지 원두입니다.",
   },
   {
-    id: "3",
+    id: SLOT_IDS.SLOT_3,
     title: "파나마 게이샤 워시드 : 꽃향기의 정점",
     series: "Signature Collection",
     category: "BEANS",
@@ -154,7 +162,7 @@ export const mockSlots: Slot[] = [
     excerpt: "파나마 보케테 지역 워시드 게이샤. 재스민, 복숭아, 밀크티 노트가 조화를 이루며 세계 최고가 경매 원두 중 하나로 꼽힙니다.",
   },
   {
-    id: "4",
+    id: SLOT_IDS.SLOT_4,
     title: "콜롬비아 핑크 버번 : 달콤한 반란",
     series: "Limited Reserve Series",
     category: "TASTING",
@@ -277,7 +285,7 @@ function c(
 }
 
 const slotDetailExtensions: Record<string, SlotDetailExtra> = {
-  "1": {
+  [SLOT_IDS.SLOT_1]: {
     description:
       "에티오피아 예가체프 지역에서 생산된 아나에어로빅 발효 방식의 네추럴 프로세스 원두입니다. 산소를 차단한 밀폐 탱크에서 72시간 발효되어 독특한 와인 같은 풍미와 복합적인 과일 향이 발달합니다. 딸기잼, 블루베리, 장미 향이 레이어를 이루어 펼쳐지며, 깔끔한 마무리가 인상적입니다.",
     hashtags: ["#에티오피아", "#아나에어로빅", "#네추럴", "#스페셜티", "#예가체프"],
@@ -314,7 +322,7 @@ const slotDetailExtensions: Record<string, SlotDetailExtra> = {
       totalVotes: 742,
     },
   },
-  "2": {
+  [SLOT_IDS.SLOT_2]: {
     description:
       "케냐 AA 등급 게이샤 품종은 동아프리카 고산지에서 자란 최상급 원두입니다. 풀 워시드 방식으로 가공되어 투명하고 섬세한 풍미가 극대화되었으며, 블랙커런트, 패션프루트, 자스민 향이 겹겹이 펼쳐집니다. 산미가 밝고 생기 있으며 긴 여운이 특징입니다.",
     hashtags: ["#케냐", "#게이샤", "#워시드", "#AA등급", "#아프리카"],
@@ -350,7 +358,7 @@ const slotDetailExtensions: Record<string, SlotDetailExtra> = {
       totalVotes: 518,
     },
   },
-  "3": {
+  [SLOT_IDS.SLOT_3]: {
     description:
       "파나마 보케테 에리다 에스테이트에서 재배된 워시드 게이샤입니다. 세계 최고가 경매에서 수차례 낙찰된 이 원두는 재스민, 복숭아, 밀크티 노트가 환상적으로 조화를 이룹니다. 극도로 클린한 컵과 독보적인 플로럴 향이 이 원두를 특별하게 만듭니다.",
     hashtags: ["#파나마", "#게이샤", "#워시드", "#보케테", "#스페셜티"],
@@ -387,7 +395,7 @@ const slotDetailExtensions: Record<string, SlotDetailExtra> = {
       totalVotes: 905,
     },
   },
-  "4": {
+  [SLOT_IDS.SLOT_4]: {
     description:
       "콜롬비아 우일라 고산지에서 재배된 핑크 버번 품종입니다. 허니 프로세싱을 통해 과일의 단맛을 최대로 끌어냈으며, 딸기잼, 캐러멜, 다크 초콜릿이 순서대로 전개됩니다. 중배전으로 로스팅하여 산미와 바디감의 균형이 탁월합니다.",
     hashtags: ["#콜롬비아", "#핑크버번", "#허니", "#우일라", "#중남미"],
@@ -433,10 +441,10 @@ export const mockSlotDetails: Record<string, SlotDetail> = Object.fromEntries(
 
 // DB 시드 데이터의 실제 product_variant UUID
 const VARIANT_IDS: Record<string, { v200g: string; v600g: string }> = {
-  "1": { v200g: "01960001-0000-7000-8000-000000010000", v600g: "01960001-0000-7000-8000-000000020000" },
-  "2": { v200g: "01960002-0000-7000-8000-000000010000", v600g: "01960002-0000-7000-8000-000000020000" },
-  "3": { v200g: "01960003-0000-7000-8000-000000010000", v600g: "01960003-0000-7000-8000-000000020000" },
-  "4": { v200g: "01960004-0000-7000-8000-000000010000", v600g: "01960004-0000-7000-8000-000000020000" },
+  [SLOT_IDS.SLOT_1]: { v200g: "01960001-0000-7000-8000-000000010000", v600g: "01960001-0000-7000-8000-000000020000" },
+  [SLOT_IDS.SLOT_2]: { v200g: "01960002-0000-7000-8000-000000010000", v600g: "01960002-0000-7000-8000-000000020000" },
+  [SLOT_IDS.SLOT_3]: { v200g: "01960003-0000-7000-8000-000000010000", v600g: "01960003-0000-7000-8000-000000020000" },
+  [SLOT_IDS.SLOT_4]: { v200g: "01960004-0000-7000-8000-000000010000", v600g: "01960004-0000-7000-8000-000000020000" },
 };
 
 function makeRewards(slotId: string, price200g: number, price600g: number): Reward[] {
@@ -462,8 +470,8 @@ function makeRewards(slotId: string, price200g: number, price600g: number): Rewa
 }
 
 export const mockSlotFundingData: Record<string, { funding: FundingStatus; rewards: Reward[] }> = {
-  "1": { funding: { percent: 127, daysLeft: 14, supporters: 842, targetAmount: 5000000, currentAmount: 6350000 }, rewards: makeRewards("1", 19000, 49000) },
-  "2": { funding: { percent: 85, daysLeft: 22, supporters: 423, targetAmount: 3000000, currentAmount: 2550000 }, rewards: makeRewards("2", 22000, 58000) },
-  "3": { funding: { percent: 85, daysLeft: 18, supporters: 678, targetAmount: 6000000, currentAmount: 5100000 }, rewards: makeRewards("3", 35000, 89000) },
-  "4": { funding: { percent: 78, daysLeft: 30, supporters: 312, targetAmount: 2500000, currentAmount: 1950000 }, rewards: makeRewards("4", 20000, 52000) },
+  [SLOT_IDS.SLOT_1]: { funding: { percent: 127, daysLeft: 14, supporters: 842, targetAmount: 5000000, currentAmount: 6350000 }, rewards: makeRewards(SLOT_IDS.SLOT_1, 19000, 49000) },
+  [SLOT_IDS.SLOT_2]: { funding: { percent: 85, daysLeft: 22, supporters: 423, targetAmount: 3000000, currentAmount: 2550000 }, rewards: makeRewards(SLOT_IDS.SLOT_2, 22000, 58000) },
+  [SLOT_IDS.SLOT_3]: { funding: { percent: 85, daysLeft: 18, supporters: 678, targetAmount: 6000000, currentAmount: 5100000 }, rewards: makeRewards(SLOT_IDS.SLOT_3, 35000, 89000) },
+  [SLOT_IDS.SLOT_4]: { funding: { percent: 78, daysLeft: 30, supporters: 312, targetAmount: 2500000, currentAmount: 1950000 }, rewards: makeRewards(SLOT_IDS.SLOT_4, 20000, 52000) },
 };

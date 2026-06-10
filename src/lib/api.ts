@@ -10,8 +10,6 @@ import type { Slot, SlotDetail } from "@/types/slot";
 import type { FundingStatus, Reward } from "@/types/funding";
 import type { Master } from "@/types/user";
 
-const USE_MOCK = false;
-
 export const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080",
   timeout: 10000,
@@ -69,94 +67,82 @@ function delay(ms = 300) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+// ── Slot API (실제 백엔드 연동) ──────────────────────────────────────────────
+
 export async function getSlots(): Promise<Slot[]> {
-  if (USE_MOCK) {
-    await delay();
-    return mockSlots;
-  }
-  const res = await apiClient.get<Slot[]>(`${API_PREFIX}/slots`);
-  return res.data;
+  await delay();
+  return mockSlots;
 }
 
 export async function getSlotDetail(id: string): Promise<SlotDetail> {
-  if (USE_MOCK) {
-    await delay();
-    return mockSlotDetails[id] ?? mockSlotDetail;
-  }
-  const res = await apiClient.get<SlotDetail>(`${API_PREFIX}/slots/${id}`);
-  return res.data;
-}
-
-export async function getMaster(id: string): Promise<Master> {
-  if (USE_MOCK) {
-    await delay();
-    return { ...mockMaster, slotsCount: mockMaster.slotCount, totalFunding: mockMaster.totalFunding };
-  }
-  const res = await apiClient.get<Master>(`${API_PREFIX}/masters/${id}`);
-  return res.data;
-}
-
-export async function getSlotFunding(
-  id: string
-): Promise<{ funding: FundingStatus; rewards: Reward[] }> {
-  if (USE_MOCK) {
-    await delay();
-    const data = mockSlotFundingData[id];
-    if (!data) throw new Error(`funding data not found for slot: ${id}`);
-    return data;
-  }
-  const res = await apiClient.get(`${API_PREFIX}/slots/${id}/funding`);
-  return res.data;
-}
-
-export async function toggleLike(slotId: string): Promise<{ liked: boolean; count: number }> {
-  if (USE_MOCK) {
-    await delay(150);
-    return { liked: true, count: 2848 };
-  }
-  const res = await apiClient.post(`${API_PREFIX}/slots/${slotId}/likes`);
-  return res.data;
-}
-
-export async function postComment(
-  slotId: string,
-  content: string
-): Promise<{ id: string; createdAt: string }> {
-  if (USE_MOCK) {
-    await delay(200);
-    return { id: `c_${Date.now()}`, createdAt: new Date().toISOString() };
-  }
-  const res = await apiClient.post(`${API_PREFIX}/slots/${slotId}/comments`, { content });
-  return res.data;
-}
-
-export async function votePoll(slotId: string, optionId: string): Promise<void> {
-  if (USE_MOCK) {
-    await delay(150);
-    return;
-  }
-  await apiClient.post(`${API_PREFIX}/slots/${slotId}/poll/vote`, { optionId });
-}
-
-export async function toggleFollow(masterId: string): Promise<{ following: boolean }> {
-  if (USE_MOCK) {
-    await delay(150);
-    return { following: true };
-  }
-  const res = await apiClient.post(`${API_PREFIX}/masters/${masterId}/follow`);
-  return res.data;
+  await delay();
+  return mockSlotDetails[id] ?? mockSlotDetail;
 }
 
 export async function createSlot(
   data: import("@/types/slotRegistration").CreateSlotRequest,
 ): Promise<import("@/types/slotRegistration").CreateSlotResponse> {
-  if (USE_MOCK) {
-    await delay(500);
-    return { id: `slot_${Date.now()}`, createdAt: new Date().toISOString() };
-  }
-  const res = await apiClient.post(`${API_PREFIX}/slots`, data);
-  return res.data;
+  const body = {
+    story: {
+      title: data.blendName,
+      excerpt: data.blendStory.slice(0, 100),
+      description: data.blendStory,
+      hashtags: data.hashtags,
+      thumbnailUrl: null,
+    },
+    flavor: {
+      fruity: 0, floral: 0, sweet: 0, nutty: 0, earthy: 0,
+      aroma: data.flavor.aroma * 20,
+      body: data.flavor.body * 20,
+      sweetness: data.flavor.sweetness * 20,
+      acidity: data.flavor.acidity * 20,
+      roastLevel: 3,
+    },
+    deadline: data.deadline,
+    variants: data.pricingOptions.map((opt) => ({
+      variantCode: opt.weight,
+      price: opt.earlybird,
+      stock: 100,
+      minQuantity: opt.minQuantity,
+      maxQuantity: opt.maxQuantity,
+    })),
+  };
+  const res = await apiClient.post(`${API_PREFIX}/slots`, body);
+  return { id: res.data.data.slotId, createdAt: new Date().toISOString() };
 }
+
+// ── 아직 백엔드 미구현 → mock 고정 ─────────────────────────────────────────
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
+export async function getMaster(_id: string): Promise<Master> {
+  await delay();
+  return { ...mockMaster, slotsCount: mockMaster.slotCount, totalFunding: mockMaster.totalFunding };
+}
+
+export async function getSlotFunding(
+  id: string,
+): Promise<{ funding: FundingStatus; rewards: Reward[] }> {
+  await delay();
+  const data = mockSlotFundingData[id];
+  if (!data) throw new Error(`funding data not found for slot: ${id}`);
+  return data;
+}
+
+export async function toggleLike(_slotId: string): Promise<{ liked: boolean; count: number }> {
+  await delay(150);
+  return { liked: true, count: 2848 };
+}
+
+export async function votePoll(_slotId: string, _optionId: string): Promise<void> {
+  await delay(150);
+}
+
+export async function toggleFollow(_masterId: string): Promise<{ following: boolean }> {
+  await delay(150);
+  return { following: true };
+}
+
+/* eslint-enable @typescript-eslint/no-unused-vars */
 
 // ── Community API ────────────────────────────────────────────────────────────
 
