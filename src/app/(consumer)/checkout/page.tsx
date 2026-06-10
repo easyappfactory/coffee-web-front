@@ -7,6 +7,7 @@ import Image from "next/image"
 import { ChevronLeft, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useCheckoutStore } from "@/store/checkoutStore"
+import { ShippingAddressSection } from "@/components/checkout/ShippingAddressSection"
 
 const TOSS_CLIENT_KEY = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY ?? ""
 
@@ -22,6 +23,7 @@ function CheckoutContent() {
     slotThumbnail,
     masterName,
     selectedReward,
+    isShippingReady,
   } = useCheckoutStore()
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -36,6 +38,7 @@ function CheckoutContent() {
       router.replace("/feed")
       return
     }
+    if (!isShippingReady) return
 
     let mounted = true
 
@@ -62,7 +65,7 @@ function CheckoutContent() {
     return () => {
       mounted = false
     }
-  }, [orderId, amount, router])
+  }, [orderId, amount, router, isShippingReady])
 
   if (!orderId || !amount) {
     return (
@@ -170,16 +173,27 @@ function CheckoutContent() {
           </div>
         </section>
 
+        {/* 배송지 정보 */}
+        <ShippingAddressSection />
+
         {/* Toss 결제수단 위젯 */}
-        <section className="mt-5">
-          <div id="payment-method">
-            {!widgetReady && (
-              <div className="flex items-center justify-center rounded-card border border-border bg-card py-12">
-                <Loader2 className="h-5 w-5 animate-spin text-ink-muted" />
-              </div>
-            )}
-          </div>
-        </section>
+        {isShippingReady ? (
+          <section className="mt-5">
+            <div id="payment-method">
+              {!widgetReady && (
+                <div className="flex items-center justify-center rounded-card border border-border bg-card py-12">
+                  <Loader2 className="h-5 w-5 animate-spin text-ink-muted" />
+                </div>
+              )}
+            </div>
+          </section>
+        ) : (
+          <section className="mt-5">
+            <div className="flex items-center justify-center rounded-card border border-border bg-card py-12 text-[13px] text-ink-muted">
+              배송지를 입력하면 결제수단을 선택할 수 있습니다
+            </div>
+          </section>
+        )}
 
         {/* Toss 약관 동의 위젯 */}
         <section className="mt-3">
@@ -190,7 +204,7 @@ function CheckoutContent() {
         <div className="mt-6">
           <Button
             onClick={handlePay}
-            disabled={!widgetReady || isPaying}
+            disabled={!widgetReady || isPaying || !isShippingReady}
             className="w-full rounded-card py-5 font-display text-[16px] font-bold tracking-[0.02em] bg-brand text-white hover:bg-brand-dark"
           >
             {isPaying && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
