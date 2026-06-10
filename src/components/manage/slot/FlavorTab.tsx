@@ -5,10 +5,12 @@ import { RadarChart } from "@/components/slot/detail/RadarChart"
 import type { SlotRegistrationFormData } from "@/types/slotRegistration"
 
 const FLAVOR_AXES = [
-  { key: "aroma", label: "아로마 (Aroma)" },
-  { key: "body", label: "바디감 (Body)" },
-  { key: "sweetness", label: "단맛 (Sweetness)" },
   { key: "acidity", label: "산미 (Acidity)" },
+  { key: "sweetness", label: "단맛 (Sweetness)" },
+  { key: "bitterness", label: "쓴맛 (Bitterness)" },
+  { key: "saltiness", label: "짠맛 (Saltiness)" },
+  { key: "nutty", label: "고소한맛 (Nutty)" },
+  { key: "roastLevel", label: "배전도 (Roast Level)" },
 ] as const
 
 export function FlavorTab() {
@@ -16,10 +18,11 @@ export function FlavorTab() {
   const flavor = watch("flavor")
 
   const radarData: Record<string, number> = {
-    Aroma: flavor.aroma * 20,
-    Body: flavor.body * 20,
-    Sweetness: flavor.sweetness * 20,
-    Acidity: flavor.acidity * 20,
+    "산미": flavor.acidity,
+    "단맛": flavor.sweetness,
+    "쓴맛": flavor.bitterness,
+    "짠맛": flavor.saltiness,
+    "고소한맛": flavor.nutty,
   }
 
   return (
@@ -57,7 +60,7 @@ export function FlavorTab() {
 
       <div className="col-span-6 flex items-center justify-center rounded-3xl bg-white p-12 shadow-sm">
         <div className="relative">
-          <RadarChart data={radarData} size={280} />
+          <RadarChart data={radarData} size={280} maxValue={5} />
           <div className="mt-4 flex items-center justify-center gap-2">
             <div className="h-2 w-2 animate-pulse rounded-full bg-brand" />
             <span className="text-[10px] font-bold uppercase text-brand">

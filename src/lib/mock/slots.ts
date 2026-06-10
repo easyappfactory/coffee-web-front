@@ -1,4 +1,4 @@
-import type { Slot, SlotDetail, Comment, Poll, FlavorProfile } from "@/types/slot";
+import type { Slot, SlotDetail, Comment, Poll } from "@/types/slot";
 import type { FundingStatus, Reward } from "@/types/funding";
 
 // POC 슬롯 product ID (dev DB 기준)
@@ -186,22 +186,7 @@ export const mockSlotDetail: SlotDetail = {
   description:
     "에티오피아 예가체프 지역에서 생산된 아나에어로빅 발효 방식의 네추럴 프로세스 원두입니다. 산소를 차단한 밀폐 탱크에서 발효되어 독특한 와인 같은 풍미와 복합적인 과일 향이 발달합니다. 이 원두는 일반적인 에티오피아 원두보다 훨씬 강렬한 발효 향을 지니며, 딸기잼, 블루베리, 장미 향이 레이어를 이루어 펼쳐집니다.",
   hashtags: ["#에티오피아", "#아나에어로빅", "#네추럴", "#스페셜티", "#예가체프"],
-  flavor: {
-    radar: [
-      { axis: "FRUITY", value: 80 },
-      { axis: "FLORAL", value: 60 },
-      { axis: "SWEET", value: 75 },
-      { axis: "NUTTY", value: 40 },
-      { axis: "EARTHY", value: 50 },
-    ],
-    bars: [
-      { name: "Acidity", value: 85 },
-      { name: "Sweetness", value: 70 },
-      { name: "Body", value: 60 },
-      { name: "Bitterness", value: 30 },
-    ],
-    roastingLevel: 2,
-  },
+  flavor: { acidity: 4, sweetness: 4, bitterness: 2, saltiness: 1, nutty: 2, roastLevel: 2 },
   comments: [
     {
       id: "c1",
@@ -259,7 +244,7 @@ export const mockSlotDetail: SlotDetail = {
 type SlotDetailExtra = {
   description: string;
   hashtags: string[];
-  flavor: FlavorProfile;
+  flavor: import("@/types/slot").FlavorProfile;
   comments: Comment[];
   poll?: Poll;
 };
@@ -289,22 +274,7 @@ const slotDetailExtensions: Record<string, SlotDetailExtra> = {
     description:
       "에티오피아 예가체프 지역에서 생산된 아나에어로빅 발효 방식의 네추럴 프로세스 원두입니다. 산소를 차단한 밀폐 탱크에서 72시간 발효되어 독특한 와인 같은 풍미와 복합적인 과일 향이 발달합니다. 딸기잼, 블루베리, 장미 향이 레이어를 이루어 펼쳐지며, 깔끔한 마무리가 인상적입니다.",
     hashtags: ["#에티오피아", "#아나에어로빅", "#네추럴", "#스페셜티", "#예가체프"],
-    flavor: {
-      radar: [
-        { axis: "FRUITY", value: 85 },
-        { axis: "FLORAL", value: 60 },
-        { axis: "SWEET", value: 75 },
-        { axis: "NUTTY", value: 30 },
-        { axis: "EARTHY", value: 45 },
-      ],
-      bars: [
-        { name: "Acidity", value: 85 },
-        { name: "Sweetness", value: 70 },
-        { name: "Body", value: 60 },
-        { name: "Bitterness", value: 30 },
-      ],
-      roastingLevel: 2,
-    },
+    flavor: { acidity: 4, sweetness: 4, bitterness: 2, saltiness: 1, nutty: 2, roastLevel: 2 },
     comments: [
       c("c1", "u1", "coffee_lover_92", "작년에 비슷한 프로세싱 원두를 마셔봤는데 정말 독특한 경험이었어요. 이번 건 더 기대됩니다!", "#a06040", "2시간 전", 14),
       c("c2", "u2", "brewing_seoul", "72시간 발효... 진짜 궁금하네요. 브루잉 영상도 같이 올려주실 건가요 마스터님?", "#4a7a8a", "5시간 전", 9),
@@ -326,22 +296,7 @@ const slotDetailExtensions: Record<string, SlotDetailExtra> = {
     description:
       "케냐 AA 등급 게이샤 품종은 동아프리카 고산지에서 자란 최상급 원두입니다. 풀 워시드 방식으로 가공되어 투명하고 섬세한 풍미가 극대화되었으며, 블랙커런트, 패션프루트, 자스민 향이 겹겹이 펼쳐집니다. 산미가 밝고 생기 있으며 긴 여운이 특징입니다.",
     hashtags: ["#케냐", "#게이샤", "#워시드", "#AA등급", "#아프리카"],
-    flavor: {
-      radar: [
-        { axis: "FRUITY", value: 70 },
-        { axis: "FLORAL", value: 85 },
-        { axis: "SWEET", value: 65 },
-        { axis: "NUTTY", value: 25 },
-        { axis: "EARTHY", value: 30 },
-      ],
-      bars: [
-        { name: "Acidity", value: 90 },
-        { name: "Sweetness", value: 60 },
-        { name: "Body", value: 45 },
-        { name: "Bitterness", value: 20 },
-      ],
-      roastingLevel: 1,
-    },
+    flavor: { acidity: 5, sweetness: 3, bitterness: 1, saltiness: 0, nutty: 1, roastLevel: 1 },
     comments: [
       c("c1", "u5", "floral_fan", "게이샤 품종 특유의 플로럴 향을 케냐 테루아르가 어떻게 변주할지 너무 궁금합니다!", "#3a6a8a", "3시간 전", 18),
       c("c2", "u6", "q_grader_fan", "Q-Grader 심사위원이 직접 큐레이션한 원두라니 신뢰가 가네요. 기대됩니다.", "#5a8a6a", "1일 전", 11),
@@ -362,22 +317,7 @@ const slotDetailExtensions: Record<string, SlotDetailExtra> = {
     description:
       "파나마 보케테 에리다 에스테이트에서 재배된 워시드 게이샤입니다. 세계 최고가 경매에서 수차례 낙찰된 이 원두는 재스민, 복숭아, 밀크티 노트가 환상적으로 조화를 이룹니다. 극도로 클린한 컵과 독보적인 플로럴 향이 이 원두를 특별하게 만듭니다.",
     hashtags: ["#파나마", "#게이샤", "#워시드", "#보케테", "#스페셜티"],
-    flavor: {
-      radar: [
-        { axis: "FRUITY", value: 60 },
-        { axis: "FLORAL", value: 92 },
-        { axis: "SWEET", value: 70 },
-        { axis: "NUTTY", value: 20 },
-        { axis: "EARTHY", value: 15 },
-      ],
-      bars: [
-        { name: "Acidity", value: 80 },
-        { name: "Sweetness", value: 75 },
-        { name: "Body", value: 50 },
-        { name: "Bitterness", value: 15 },
-      ],
-      roastingLevel: 1,
-    },
+    flavor: { acidity: 4, sweetness: 4, bitterness: 1, saltiness: 0, nutty: 1, roastLevel: 1 },
     comments: [
       c("c1", "u7", "geisha_hunter", "파나마 게이샤 워시드는 정말 최고의 선택이에요. 매년 챙겨 마시는 원두인데 이번 슬롯 꼭 참여할게요!", "#8a6aa0", "2시간 전", 31),
       c("c2", "u8", "coffee_diary", "케멕스로 추출하면 그 플로럴 향이 더 극대화되더라고요. 추출 팁도 같이 제공해주시나요?", "#6a4a90", "1일 전", 15),
@@ -399,22 +339,7 @@ const slotDetailExtensions: Record<string, SlotDetailExtra> = {
     description:
       "콜롬비아 우일라 고산지에서 재배된 핑크 버번 품종입니다. 허니 프로세싱을 통해 과일의 단맛을 최대로 끌어냈으며, 딸기잼, 캐러멜, 다크 초콜릿이 순서대로 전개됩니다. 중배전으로 로스팅하여 산미와 바디감의 균형이 탁월합니다.",
     hashtags: ["#콜롬비아", "#핑크버번", "#허니", "#우일라", "#중남미"],
-    flavor: {
-      radar: [
-        { axis: "FRUITY", value: 80 },
-        { axis: "FLORAL", value: 55 },
-        { axis: "SWEET", value: 85 },
-        { axis: "NUTTY", value: 45 },
-        { axis: "EARTHY", value: 50 },
-      ],
-      bars: [
-        { name: "Acidity", value: 75 },
-        { name: "Sweetness", value: 85 },
-        { name: "Body", value: 65 },
-        { name: "Bitterness", value: 35 },
-      ],
-      roastingLevel: 2,
-    },
+    flavor: { acidity: 4, sweetness: 4, bitterness: 2, saltiness: 1, nutty: 2, roastLevel: 2 },
     comments: [
       c("c1", "u10", "sweetbean", "핑크 버번은 처음 접해봤는데 딸기잼 같은 단맛이 정말 인상적이었어요. 이 슬롯 너무 기다려집니다!", "#c06080", "4시간 전", 17),
       c("c2", "u11", "sca_fan", "SCA 트레이너가 직접 큐레이션한 원두라니 믿음이 가네요. 펀딩 참여하겠습니다.", "#3a8a4a", "1일 전", 8),

@@ -140,7 +140,14 @@ export function SlotDetailTabs({ slot, slotId, communityQuery }: SlotDetailTabsP
                   FLAVOR PROFILE
                 </h3>
                 <RadarChart
-                  data={Object.fromEntries(slot.flavor.radar.map((r) => [r.axis, r.value]))}
+                  data={{
+                    "산미": slot.flavor.acidity,
+                    "단맛": slot.flavor.sweetness,
+                    "쓴맛": slot.flavor.bitterness,
+                    "짠맛": slot.flavor.saltiness,
+                    "고소한맛": slot.flavor.nutty,
+                  }}
+                  maxValue={5}
                   size={200}
                   color={accent}
                 />
@@ -150,7 +157,14 @@ export function SlotDetailTabs({ slot, slotId, communityQuery }: SlotDetailTabsP
                   CUPPING SCORE
                 </h3>
                 <FlavorBars
-                  bars={slot.flavor.bars.map((b) => ({ name: b.name, value: b.value }))}
+                  bars={[
+                    { name: "산미", value: slot.flavor.acidity },
+                    { name: "단맛", value: slot.flavor.sweetness },
+                    { name: "쓴맛", value: slot.flavor.bitterness },
+                    { name: "짠맛", value: slot.flavor.saltiness },
+                    { name: "고소한맛", value: slot.flavor.nutty },
+                  ]}
+                  maxValue={5}
                   color={accent}
                 />
               </div>
@@ -160,7 +174,7 @@ export function SlotDetailTabs({ slot, slotId, communityQuery }: SlotDetailTabsP
               <h3 className="mb-4 font-display text-[12px] font-bold tracking-[0.1em] text-ink-2">
                 ROASTING LEVEL
               </h3>
-              <RoastingLevel level={slot.flavor.roastingLevel} color={accent} />
+              <RoastingLevel level={slot.flavor.roastLevel} color={accent} />
             </div>
           </div>
         )}

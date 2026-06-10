@@ -1,6 +1,7 @@
 import axios from "axios";
 import {
   mockSlots,
+  mockSlotDetails,
   mockSlotFundingData,
   mockMaster,
 } from "./mock/slots";
@@ -67,14 +68,78 @@ function delay(ms = 300) {
 
 // ── Slot API (실제 백엔드 연동) ──────────────────────────────────────────────
 
+interface SlotApiItem {
+  id: string;
+  title: string;
+  excerpt?: string;
+  thumbnailUrl?: string;
+  createdAt?: string;
+  supporters?: number;
+  hasMembership?: boolean;
+}
+
 export async function getSlots(): Promise<Slot[]> {
-  await delay();
-  return mockSlots;
+  const res = await apiClient.get(`${API_PREFIX}/slots`);
+  const items: SlotApiItem[] = res.data.data ?? res.data.items ?? [];
+  return items.map((item) => {
+    const mockSlot = mockSlots.find(s => s.id === item.id);
+    return {
+      id: item.id,
+      title: item.title,
+      excerpt: item.excerpt ?? "",
+      thumbnailUrl: item.thumbnailUrl ?? "",
+      createdAt: item.createdAt,
+      series: mockSlot?.series ?? "Limited Series",
+      category: mockSlot?.category ?? "BEANS",
+      videoUrl: mockSlot?.videoUrl,
+      duration: mockSlot?.duration ?? "10 MIN READ",
+      master: mockSlot?.master ?? mockSlots[0].master,
+      likes: mockSlot?.likes ?? 0,
+      views: mockSlot?.views ?? 0,
+      isLiked: mockSlot?.isLiked ?? false,
+      supporters: mockSlot?.supporters ?? item.supporters ?? 0,
+      capacity: mockSlot?.capacity ?? 1000,
+      accentColor: mockSlot?.accentColor,
+      thumbnailColor: mockSlot?.thumbnailColor,
+      hasMembership: item.hasMembership,
+    } satisfies Slot;
+  });
 }
 
 export async function getSlotDetail(id: string): Promise<SlotDetail> {
   const res = await apiClient.get(`${API_PREFIX}/slots/${id}`);
-  return res.data.data;
+  const api = res.data.data;
+  const mockSlot = mockSlots.find(s => s.id === id);
+  const mockDetail = mockSlotDetails[id];
+
+  return {
+    id: api.id,
+    title: api.title,
+    excerpt: api.excerpt ?? "",
+    description: api.description ?? "",
+    hashtags: api.hashtags ?? [],
+    thumbnailUrl: api.thumbnailUrl ?? "",
+    imageUrls: api.imageUrls ?? [],
+    deadline: api.deadline,
+    status: api.status,
+    flavor: api.flavor,
+    createdAt: api.createdAt,
+    hasMembership: api.hasMembership ?? false,
+    series: mockSlot?.series ?? "Limited Series",
+    category: mockSlot?.category ?? "BEANS",
+    videoUrl: mockSlot?.videoUrl,
+    duration: mockSlot?.duration ?? "10 MIN READ",
+    master: mockSlot?.master ?? mockSlots[0].master,
+    likes: mockSlot?.likes ?? 0,
+    views: mockSlot?.views ?? 0,
+    isLiked: mockSlot?.isLiked ?? false,
+    supporters: mockSlot?.supporters ?? 0,
+    capacity: mockSlot?.capacity ?? 1000,
+    accentColor: mockSlot?.accentColor,
+    thumbnailColor: mockSlot?.thumbnailColor,
+    comments: mockDetail?.comments ?? [],
+    poll: mockDetail?.poll,
+  };
 }
 
 export async function createSlot(
@@ -89,12 +154,12 @@ export async function createSlot(
       thumbnailUrl: null,
     },
     flavor: {
-      fruity: 0, floral: 0, sweet: 0, nutty: 0, earthy: 0,
-      aroma: data.flavor.aroma * 20,
-      body: data.flavor.body * 20,
-      sweetness: data.flavor.sweetness * 20,
-      acidity: data.flavor.acidity * 20,
-      roastLevel: 3,
+      acidity: data.flavor.acidity,
+      sweetness: data.flavor.sweetness,
+      bitterness: data.flavor.bitterness,
+      saltiness: data.flavor.saltiness,
+      nutty: data.flavor.nutty,
+      roastLevel: data.flavor.roastLevel,
     },
     deadline: data.deadline,
     variants: data.pricingOptions.map((opt) => ({

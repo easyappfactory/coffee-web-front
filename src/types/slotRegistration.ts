@@ -1,8 +1,10 @@
 export interface SlotFlavorInput {
-  aroma: number
-  body: number
-  sweetness: number
   acidity: number
+  sweetness: number
+  bitterness: number
+  saltiness: number
+  nutty: number
+  roastLevel: number
 }
 
 export interface PricingOption {
