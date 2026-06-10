@@ -167,17 +167,17 @@ export function ShippingAddressSection() {
           <div className="space-y-4">
             <div>
               <label className="mb-1 block text-[12px] font-medium text-ink-muted">우편번호</label>
-              <div className="flex items-stretch gap-2">
+              <div className="flex items-center gap-2">
                 <input
                   value={zipcode}
                   readOnly
                   placeholder="우편번호"
-                  className="flex-1 rounded-inner border border-border bg-surface px-3 py-2.5 text-[13px] text-ink-1"
+                  className="flex-1 h-[42px] rounded-inner border border-border bg-surface px-3 text-[13px] text-ink-1"
                 />
                 <Button
                   type="button"
                   onClick={() => setShowPostcode(true)}
-                  className="shrink-0 rounded-inner bg-brand px-5 text-[13px] font-medium text-white hover:bg-brand-dark"
+                  className="shrink-0 h-[42px] rounded-inner bg-brand px-5 text-[13px] font-medium text-white hover:bg-brand-dark"
                 >
                   우편번호 찾기
                 </Button>
