@@ -20,7 +20,7 @@ type ConfirmResult = Awaited<ReturnType<typeof confirmPayment>>
 function CheckoutCompleteContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { slotId, slotTitle, selectedReward, reset } = useCheckoutStore()
+  const { slotId, slotTitle, selectedReward, reset, shippingAddress, saveAsDefault } = useCheckoutStore()
 
   const [result, setResult] = useState<ConfirmResult | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -35,7 +35,11 @@ function CheckoutCompleteContent() {
       return
     }
 
-    confirmPayment(paymentKey, orderId, amount)
+    confirmPayment(
+      paymentKey, orderId, amount,
+      shippingAddress ?? undefined,
+      saveAsDefault || undefined,
+    )
       .then(setResult)
       .catch((err) => {
         const msg =
