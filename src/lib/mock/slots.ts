@@ -1,7 +1,7 @@
 import type { Slot, SlotDetail, Comment, Poll, FlavorProfile } from "@/types/slot";
 import type { FundingStatus, Reward } from "@/types/funding";
 
-// Mock 슬롯 UUID (POC용)
+// POC 슬롯 product ID (dev DB 기준)
 export const SLOT_IDS = {
   SLOT_1: "01960001-0000-7000-8000-000000000100",
   SLOT_2: "01960002-0000-7000-8000-000000000100",
