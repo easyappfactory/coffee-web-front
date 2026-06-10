@@ -470,8 +470,8 @@ function makeRewards(slotId: string, price200g: number, price600g: number): Rewa
 }
 
 export const mockSlotFundingData: Record<string, { funding: FundingStatus; rewards: Reward[] }> = {
-  [SLOT_IDS.SLOT_1]: { funding: { percent: 127, daysLeft: 14, supporters: 842, targetAmount: 5000000, currentAmount: 6350000 }, rewards: makeRewards(SLOT_IDS.SLOT_1, 19000, 49000) },
-  [SLOT_IDS.SLOT_2]: { funding: { percent: 85, daysLeft: 22, supporters: 423, targetAmount: 3000000, currentAmount: 2550000 }, rewards: makeRewards(SLOT_IDS.SLOT_2, 22000, 58000) },
-  [SLOT_IDS.SLOT_3]: { funding: { percent: 85, daysLeft: 18, supporters: 678, targetAmount: 6000000, currentAmount: 5100000 }, rewards: makeRewards(SLOT_IDS.SLOT_3, 35000, 89000) },
-  [SLOT_IDS.SLOT_4]: { funding: { percent: 78, daysLeft: 30, supporters: 312, targetAmount: 2500000, currentAmount: 1950000 }, rewards: makeRewards(SLOT_IDS.SLOT_4, 20000, 52000) },
+  [SLOT_IDS.SLOT_1]: { funding: { percent: 127, daysLeft: 14, supporters: 842, targetAmount: 5000000, currentAmount: 6350000, currentQuantityG: 380, targetQuantityG: 600 }, rewards: makeRewards(SLOT_IDS.SLOT_1, 19000, 49000) },
+  [SLOT_IDS.SLOT_2]: { funding: { percent: 85, daysLeft: 22, supporters: 423, targetAmount: 3000000, currentAmount: 2550000, currentQuantityG: 170, targetQuantityG: 200 }, rewards: makeRewards(SLOT_IDS.SLOT_2, 22000, 58000) },
+  [SLOT_IDS.SLOT_3]: { funding: { percent: 85, daysLeft: 18, supporters: 678, targetAmount: 6000000, currentAmount: 5100000, currentQuantityG: 510, targetQuantityG: 600 }, rewards: makeRewards(SLOT_IDS.SLOT_3, 35000, 89000) },
+  [SLOT_IDS.SLOT_4]: { funding: { percent: 78, daysLeft: 30, supporters: 312, targetAmount: 2500000, currentAmount: 1950000, currentQuantityG: 156, targetQuantityG: 200 }, rewards: makeRewards(SLOT_IDS.SLOT_4, 20000, 52000) },
 };
