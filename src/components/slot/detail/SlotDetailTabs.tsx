@@ -209,7 +209,7 @@ export function SlotDetailTabs({ slot, slotId, communityQuery }: SlotDetailTabsP
                   <div className="mb-2.5 flex justify-between">
                     <span className="text-[13px] font-medium text-ink-2">현재 달성</span>
                     <span className="font-display text-[13px] font-bold text-ink-1">
-                      {slot.hasMembership && funding.currentQuantityG != null
+                      {funding.currentQuantityG != null
                         ? `${funding.currentQuantityG}g / ${funding.targetQuantityG}g`
                         : `${formatKRW(funding.currentAmount)} / ${formatKRW(funding.targetAmount)}`}
                     </span>
