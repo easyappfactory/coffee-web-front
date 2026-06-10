@@ -45,6 +45,7 @@ export interface Slot {
   capacity?: number;
   accentColor?: string;
   thumbnailColor?: string;
+  hasMembership?: boolean;
 }
 
 export interface Comment {

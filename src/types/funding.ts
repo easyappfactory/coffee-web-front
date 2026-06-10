@@ -19,6 +19,8 @@ export interface FundingStatus {
   supporters: number;
   targetAmount: number;
   currentAmount: number;
+  currentQuantityG?: number;
+  targetQuantityG?: number;
 }
 
 export interface Order {
