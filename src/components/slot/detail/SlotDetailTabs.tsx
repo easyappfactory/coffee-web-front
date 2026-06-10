@@ -209,7 +209,9 @@ export function SlotDetailTabs({ slot, slotId, communityQuery }: SlotDetailTabsP
                   <div className="mb-2.5 flex justify-between">
                     <span className="text-[13px] font-medium text-ink-2">현재 달성</span>
                     <span className="font-display text-[13px] font-bold text-ink-1">
-                      {formatKRW(funding.currentAmount)} / {formatKRW(funding.targetAmount)}
+                      {slot.hasMembership && funding.currentQuantityG != null
+                        ? `${funding.currentQuantityG}g / ${funding.targetQuantityG}g`
+                        : `${formatKRW(funding.currentAmount)} / ${formatKRW(funding.targetAmount)}`}
                     </span>
                   </div>
                   <div
@@ -227,8 +229,10 @@ export function SlotDetailTabs({ slot, slotId, communityQuery }: SlotDetailTabsP
                 </div>
 
                 {/* rewards */}
+                {!slot.hasMembership && (
+                  <>
                 <h3 className="mb-3.5 font-display text-[15px] font-bold text-ink-1">
-                  리워드 선택
+                  옵션 선택
                 </h3>
                 <div className="mb-6 flex flex-col gap-2.5">
                   {rewards.map((r) => {
@@ -301,6 +305,8 @@ export function SlotDetailTabs({ slot, slotId, communityQuery }: SlotDetailTabsP
                   <div className="rounded-card border border-green-200 bg-green-50 p-4 text-center font-display font-bold text-green-700">
                     펀딩이 성공적으로 완료되었습니다 🎉
                   </div>
+                )}
+                  </>
                 )}
               </>
             ) : (
