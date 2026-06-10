@@ -8,6 +8,7 @@ import {
 import type { Slot, SlotDetail } from "@/types/slot";
 import type { FundingStatus, Reward } from "@/types/funding";
 import type { Master } from "@/types/user";
+import type { ShippingAddress, SaveShippingAddressRequest } from "@/types/shipping";
 
 export const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080",
@@ -40,16 +41,22 @@ const API_PREFIX = process.env.NEXT_PUBLIC_API_PREFIX!;
 export async function reservePayment(
   serviceId: string,
   variantId: string,
-  quantity: number
+  quantity: number,
+  shippingAddress?: SaveShippingAddressRequest,
+  saveAsDefault?: boolean,
 ): Promise<{ orderId: string; publicOrderNumber: string; amount: number }> {
-  const res = await apiClient.post(`${API_PREFIX}/order/reserve`, { serviceId, variantId, quantity });
+  const res = await apiClient.post(`${API_PREFIX}/order/reserve`, {
+    serviceId, variantId, quantity, shippingAddress, saveAsDefault,
+  });
   return res.data.data;
 }
 
 export async function confirmPayment(
   paymentKey: string,
   orderId: string,
-  amount: number
+  amount: number,
+  shippingAddress?: SaveShippingAddressRequest,
+  saveAsDefault?: boolean,
 ): Promise<{
   orderId: string;
   publicOrderNumber: string;
@@ -58,7 +65,9 @@ export async function confirmPayment(
   status: string;
   paymentKey: string;
 }> {
-  const res = await apiClient.post(`${API_PREFIX}/order/confirm`, { paymentKey, orderId, amount });
+  const res = await apiClient.post(`${API_PREFIX}/order/confirm`, {
+    paymentKey, orderId, amount, shippingAddress, saveAsDefault,
+  });
   return res.data.data;
 }
 
@@ -353,4 +362,16 @@ export async function getPresignedUrl(
     contentType,
   });
   return res.data.data;
+}
+
+// ── 배송지 API ────────────────────────────────────────────────────────────────
+
+export async function getShippingAddress(): Promise<ShippingAddress | null> {
+  const res = await apiClient.get(`${API_PREFIX}/members/me/shipping-address`)
+  return res.data.data ?? null
+}
+
+export async function saveShippingAddress(data: SaveShippingAddressRequest): Promise<ShippingAddress> {
+  const res = await apiClient.put(`${API_PREFIX}/members/me/shipping-address`, data)
+  return res.data.data
 }
