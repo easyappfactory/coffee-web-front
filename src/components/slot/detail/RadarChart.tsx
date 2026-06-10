@@ -2,11 +2,12 @@ interface RadarChartProps {
   data: Record<string, number>;
   size?: number;
   color?: string;
+  maxValue?: number;
 }
 
-export function RadarChart({ data, size = 200, color = "#75584d" }: RadarChartProps) {
+export function RadarChart({ data, size = 200, color = "#75584d", maxValue = 100 }: RadarChartProps) {
   const keys = Object.keys(data);
-  const vals = keys.map((k) => data[k] / 100);
+  const vals = keys.map((k) => data[k] / maxValue);
   const n = keys.length;
   const cx = size / 2;
   const cy = size / 2;

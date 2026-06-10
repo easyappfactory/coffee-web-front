@@ -11,20 +11,13 @@ export interface Master {
   profileColor?: string;
 }
 
-export interface FlavorRadarPoint {
-  axis: "FRUITY" | "FLORAL" | "SWEET" | "NUTTY" | "EARTHY";
-  value: number;
-}
-
-export interface FlavorBar {
-  name: string;
-  value: number;
-}
-
 export interface FlavorProfile {
-  radar: FlavorRadarPoint[];
-  bars: FlavorBar[];
-  roastingLevel: 1 | 2 | 3 | 4 | 5;
+  acidity: number    // 산미 0-5
+  sweetness: number  // 단맛 0-5
+  bitterness: number // 쓴맛 0-5
+  saltiness: number  // 짠맛 0-5
+  nutty: number      // 고소한맛 0-5
+  roastLevel: number // 배전도 1-5
 }
 
 export interface Slot {
@@ -76,6 +69,9 @@ export interface SlotDetail extends Slot {
   description: string;
   hashtags: string[];
   flavor: FlavorProfile;
+  imageUrls?: string[];
+  deadline?: string;
+  status?: string;
   comments: Comment[];
   poll?: Poll;
 }

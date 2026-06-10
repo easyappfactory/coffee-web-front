@@ -1,9 +1,10 @@
 interface FlavorBarsProps {
   bars: { name: string; value: number }[]
   color?: string
+  maxValue?: number
 }
 
-export function FlavorBars({ bars, color = "#75584d" }: FlavorBarsProps) {
+export function FlavorBars({ bars, color = "#75584d", maxValue = 100 }: FlavorBarsProps) {
   return (
     <div className="flex flex-col gap-3">
       {bars.map((b) => (
@@ -20,7 +21,7 @@ export function FlavorBars({ bars, color = "#75584d" }: FlavorBarsProps) {
             <div
               className="h-full rounded-pill"
               style={{
-                width: `${b.value}%`,
+                width: `${(b.value / maxValue) * 100}%`,
                 background: color,
                 transition: "width 0.8s cubic-bezier(.16,1,.3,1)",
               }}

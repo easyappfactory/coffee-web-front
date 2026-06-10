@@ -28,7 +28,7 @@ export function SlotRegistrationForm() {
       blendStory: "",
       hashtags: [],
       thumbnailFile: null,
-      flavor: { aroma: 3, body: 3, sweetness: 3, acidity: 3 },
+      flavor: { acidity: 3, sweetness: 3, bitterness: 2, saltiness: 1, nutty: 2, roastLevel: 3 },
       pricingOptions: [
         {
           id: crypto.randomUUID(),
