@@ -20,7 +20,7 @@ type ConfirmResult = Awaited<ReturnType<typeof confirmPayment>>
 function CheckoutCompleteContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { slotId, slotTitle, selectedReward, reset } = useCheckoutStore()
+  const { slotId, slotTitle, selectedReward, reset, shippingAddress, saveAsDefault } = useCheckoutStore()
 
   const [result, setResult] = useState<ConfirmResult | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -35,7 +35,11 @@ function CheckoutCompleteContent() {
       return
     }
 
-    confirmPayment(paymentKey, orderId, amount)
+    confirmPayment(
+      paymentKey, orderId, amount,
+      shippingAddress ?? undefined,
+      saveAsDefault || undefined,
+    )
       .then(setResult)
       .catch((err) => {
         const msg =
@@ -100,15 +104,15 @@ function CheckoutCompleteContent() {
           <div className="divide-y divide-border">
             {(
               [
-                { label: "주문번호", val: result.publicOrderNumber },
-                { label: "슬롯", val: result.orderName || slotTitle || "-" },
+                { label: "주문번호", val: result?.publicOrderNumber ?? "-" },
+                { label: "슬롯", val: result?.orderName || slotTitle || "-" },
                 { label: "리워드", val: selectedReward?.label ?? "-" },
                 {
                   label: "결제금액",
-                  val: `${result.amount.toLocaleString()}원`,
+                  val: `${result?.amount?.toLocaleString() ?? 0}원`,
                   highlight: true,
                 },
-                { label: "상태", val: result.status },
+                { label: "상태", val: result?.status ?? "-" },
               ] as const
             ).map(({ label, val, ...rest }) => (
               <div key={label} className="flex items-start justify-between gap-4 px-6 py-4">
