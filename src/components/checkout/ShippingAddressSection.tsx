@@ -1,0 +1,256 @@
+"use client"
+
+import { useState, useEffect, useRef } from "react"
+import { useCheckoutStore } from "@/store/checkoutStore"
+import { getShippingAddress } from "@/lib/api"
+import { embedPostcode, type DaumPostcodeResult } from "@/lib/daum-postcode"
+import { Button } from "@/components/ui/button"
+import { Loader2, MapPin, Pencil } from "lucide-react"
+import type { ShippingAddress } from "@/types/shipping"
+
+export function ShippingAddressSection() {
+  const {
+    shippingAddress,
+    setShippingAddress,
+    saveAsDefault,
+    setSaveAsDefault,
+    isShippingReady,
+  } = useCheckoutStore()
+
+  const [savedAddress, setSavedAddress] = useState<ShippingAddress | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
+  const [showPostcode, setShowPostcode] = useState(false)
+  const [useOneTime, setUseOneTime] = useState(false)
+
+  const postcodeRef = useRef<HTMLDivElement>(null)
+
+  const [receiverName, setReceiverName] = useState("")
+  const [receiverPhone, setReceiverPhone] = useState("")
+  const [address, setAddress] = useState("")
+  const [addressDetail, setAddressDetail] = useState("")
+  const [zipcode, setZipcode] = useState("")
+
+  useEffect(() => {
+    getShippingAddress()
+      .then((addr) => {
+        setSavedAddress(addr)
+        if (addr && !shippingAddress) {
+          setShippingAddress(addr)
+        }
+        if (!addr) {
+          setShowForm(true)
+        }
+      })
+      .catch(() => {
+        setShowForm(true)
+      })
+      .finally(() => setIsLoading(false))
+  }, [])
+
+  useEffect(() => {
+    if (!showPostcode || !postcodeRef.current) return
+    const el = postcodeRef.current
+    el.innerHTML = ""
+
+    embedPostcode(el, (data: DaumPostcodeResult) => {
+      setZipcode(data.zonecode)
+      setAddress(data.roadAddress)
+      setShowPostcode(false)
+    })
+  }, [showPostcode])
+
+  function handleFormSubmit() {
+    if (!receiverName || !receiverPhone || !address || !zipcode) return
+    const addr: ShippingAddress = {
+      receiverName,
+      receiverPhone,
+      address,
+      addressDetail: addressDetail || null,
+      zipcode,
+    }
+    setShippingAddress(addr)
+  }
+
+  function handleUseSaved() {
+    if (savedAddress) {
+      setShippingAddress(savedAddress)
+      setUseOneTime(false)
+      setShowForm(false)
+    }
+  }
+
+  function handleUseOneTime() {
+    setUseOneTime(true)
+    setShowForm(true)
+    setShippingAddress(null)
+    setSaveAsDefault(true)
+  }
+
+  function handleChangeAddress() {
+    setShowForm(true)
+    setShippingAddress(null)
+  }
+
+  if (isLoading) {
+    return (
+      <section className="mt-5 rounded-card border border-border bg-card shadow-sm">
+        <div className="flex items-center justify-center px-6 py-8">
+          <Loader2 className="h-5 w-5 animate-spin text-ink-muted" />
+        </div>
+      </section>
+    )
+  }
+
+  return (
+    <section className="mt-5 rounded-card border border-border bg-card shadow-sm">
+      <div className="border-b border-border px-6 py-4">
+        <h2 className="flex items-center gap-2 font-display text-[13px] font-bold tracking-[0.06em] text-ink-muted">
+          <MapPin className="h-4 w-4" />
+          배송지 정보
+        </h2>
+      </div>
+
+      <div className="px-6 py-5">
+        {isShippingReady && shippingAddress && !showForm && (
+          <div>
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-[14px] font-semibold text-ink-1">
+                  {shippingAddress.receiverName}
+                  <span className="ml-2 text-ink-muted font-normal">
+                    {shippingAddress.receiverPhone}
+                  </span>
+                </p>
+                <p className="mt-1 text-[13px] text-ink-2">
+                  ({shippingAddress.zipcode}) {shippingAddress.address}
+                  {shippingAddress.addressDetail && `, ${shippingAddress.addressDetail}`}
+                </p>
+              </div>
+              <button
+                onClick={handleChangeAddress}
+                className="shrink-0 text-[12px] font-medium text-brand hover:underline flex items-center gap-1"
+              >
+                <Pencil className="h-3 w-3" />
+                변경
+              </button>
+            </div>
+            {savedAddress && (
+              <label className="mt-3 flex items-center gap-2 text-[12px] text-ink-muted cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={useOneTime}
+                  onChange={() => {
+                    if (useOneTime) handleUseSaved()
+                    else handleUseOneTime()
+                  }}
+                  className="rounded border-border"
+                />
+                이번만 다른 주소로 배송
+              </label>
+            )}
+          </div>
+        )}
+
+        {showForm && (
+          <div className="space-y-4">
+            <div>
+              <div className="flex items-end gap-2">
+                <div className="flex-1">
+                  <label className="mb-1 block text-[12px] font-medium text-ink-muted">우편번호</label>
+                  <input
+                    value={zipcode}
+                    readOnly
+                    placeholder="우편번호"
+                    className="w-full rounded-inner border border-border bg-surface px-3 py-2.5 text-[13px] text-ink-1"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  onClick={() => setShowPostcode(true)}
+                  className="shrink-0 rounded-inner bg-ink-1 px-4 py-2.5 text-[13px] font-medium text-white hover:bg-ink-2"
+                >
+                  우편번호 찾기
+                </Button>
+              </div>
+              {showPostcode && (
+                <div
+                  ref={postcodeRef}
+                  className="mt-2 rounded-inner border border-border overflow-hidden"
+                  style={{ height: 400 }}
+                />
+              )}
+            </div>
+
+            <div>
+              <label className="mb-1 block text-[12px] font-medium text-ink-muted">기본주소</label>
+              <input
+                value={address}
+                readOnly
+                placeholder="우편번호 검색 후 자동 입력됩니다"
+                className="w-full rounded-inner border border-border bg-surface px-3 py-2.5 text-[13px] text-ink-1"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-[12px] font-medium text-ink-muted">상세주소</label>
+              <input
+                value={addressDetail}
+                onChange={(e) => setAddressDetail(e.target.value)}
+                placeholder="동, 호수 등 상세 주소를 입력하세요"
+                className="w-full rounded-inner border border-border bg-white px-3 py-2.5 text-[13px] text-ink-1 outline-none focus:border-brand"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-[12px] font-medium text-ink-muted">수령인</label>
+              <input
+                value={receiverName}
+                onChange={(e) => setReceiverName(e.target.value)}
+                placeholder="수령인 이름"
+                className="w-full rounded-inner border border-border bg-white px-3 py-2.5 text-[13px] text-ink-1 outline-none focus:border-brand"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-[12px] font-medium text-ink-muted">연락처</label>
+              <input
+                value={receiverPhone}
+                onChange={(e) => setReceiverPhone(e.target.value)}
+                placeholder="010-0000-0000"
+                className="w-full rounded-inner border border-border bg-white px-3 py-2.5 text-[13px] text-ink-1 outline-none focus:border-brand"
+              />
+            </div>
+
+            <label className="flex items-center gap-2 text-[13px] text-ink-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={saveAsDefault}
+                onChange={(e) => setSaveAsDefault(e.target.checked)}
+                className="rounded border-border"
+              />
+              기본 배송지로 저장하기
+            </label>
+
+            <Button
+              onClick={handleFormSubmit}
+              disabled={!receiverName || !receiverPhone || !address || !zipcode}
+              className="w-full rounded-inner bg-brand py-3 text-[14px] font-bold text-white hover:bg-brand-dark disabled:bg-ink-muted/30"
+            >
+              배송지 확인
+            </Button>
+
+            {savedAddress && useOneTime && (
+              <button
+                onClick={handleUseSaved}
+                className="w-full text-center text-[12px] text-ink-muted hover:text-brand"
+              >
+                저장된 배송지 사용하기
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
