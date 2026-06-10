@@ -1,6 +1,7 @@
 import { create } from "zustand"
 import { persist, createJSONStorage } from "zustand/middleware"
 import type { Reward } from "@/types/funding"
+import type { ShippingAddress } from "@/types/shipping"
 
 type CheckoutStep = "order" | "payment" | "complete"
 
@@ -29,6 +30,13 @@ interface CheckoutStore {
   setSlotThumbnail: (url: string) => void
   masterName: string
   setMasterName: (name: string) => void
+
+  shippingAddress: ShippingAddress | null
+  setShippingAddress: (addr: ShippingAddress | null) => void
+  saveAsDefault: boolean
+  setSaveAsDefault: (val: boolean) => void
+  isShippingReady: boolean
+  setIsShippingReady: (val: boolean) => void
 
   reset: () => void
 }
@@ -60,6 +68,13 @@ export const useCheckoutStore = create<CheckoutStore>()(
       masterName: "",
       setMasterName: (name) => set({ masterName: name }),
 
+      shippingAddress: null,
+      setShippingAddress: (addr) => set({ shippingAddress: addr, isShippingReady: !!addr }),
+      saveAsDefault: false,
+      setSaveAsDefault: (val) => set({ saveAsDefault: val }),
+      isShippingReady: false,
+      setIsShippingReady: (val) => set({ isShippingReady: val }),
+
       reset: () =>
         set({
           selectedReward: null,
@@ -73,6 +88,9 @@ export const useCheckoutStore = create<CheckoutStore>()(
           slotTitle: "",
           slotThumbnail: "",
           masterName: "",
+          shippingAddress: null,
+          saveAsDefault: false,
+          isShippingReady: false,
         }),
     }),
     {
@@ -89,6 +107,8 @@ export const useCheckoutStore = create<CheckoutStore>()(
         slotTitle: state.slotTitle,
         slotThumbnail: state.slotThumbnail,
         masterName: state.masterName,
+        shippingAddress: state.shippingAddress,
+        saveAsDefault: state.saveAsDefault,
       }),
     },
   ),
