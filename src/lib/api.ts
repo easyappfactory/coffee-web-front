@@ -42,11 +42,9 @@ export async function reservePayment(
   serviceId: string,
   variantId: string,
   quantity: number,
-  shippingAddress?: SaveShippingAddressRequest,
-  saveAsDefault?: boolean,
 ): Promise<{ orderId: string; publicOrderNumber: string; amount: number }> {
   const res = await apiClient.post(`${API_PREFIX}/order/reserve`, {
-    serviceId, variantId, quantity, shippingAddress, saveAsDefault,
+    serviceId, variantId, quantity,
   });
   return res.data.data;
 }
