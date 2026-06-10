@@ -19,6 +19,7 @@ export function ShippingAddressSection() {
 
   const [savedAddress, setSavedAddress] = useState<ShippingAddress | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [showPostcode, setShowPostcode] = useState(false)
   const [useOneTime, setUseOneTime] = useState(false)
@@ -43,6 +44,7 @@ export function ShippingAddressSection() {
         }
       })
       .catch(() => {
+        setLoadError("배송지 정보를 불러오지 못했습니다.")
         setShowForm(true)
       })
       .finally(() => setIsLoading(false))
@@ -112,19 +114,22 @@ export function ShippingAddressSection() {
       </div>
 
       <div className="px-6 py-5">
+        {loadError && (
+          <p className="mb-3 text-[12px] text-red-500">{loadError}</p>
+        )}
         {isShippingReady && shippingAddress && !showForm && (
           <div>
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-[14px] font-semibold text-ink-1">
-                  {shippingAddress.receiverName}
+                  {shippingAddress?.receiverName}
                   <span className="ml-2 text-ink-muted font-normal">
-                    {shippingAddress.receiverPhone}
+                    {shippingAddress?.receiverPhone}
                   </span>
                 </p>
                 <p className="mt-1 text-[13px] text-ink-2">
-                  ({shippingAddress.zipcode}) {shippingAddress.address}
-                  {shippingAddress.addressDetail && `, ${shippingAddress.addressDetail}`}
+                  ({shippingAddress?.zipcode}) {shippingAddress?.address}
+                  {shippingAddress?.addressDetail && `, ${shippingAddress.addressDetail}`}
                 </p>
               </div>
               <button

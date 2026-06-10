@@ -157,7 +157,7 @@ function CheckoutContent() {
                   )}
                 </div>
                 <span className="font-display text-base font-extrabold text-brand">
-                  {selectedReward.price.toLocaleString()}원
+                  {selectedReward?.price?.toLocaleString()}원
                 </span>
               </div>
             </div>
