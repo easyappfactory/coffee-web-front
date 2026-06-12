@@ -64,8 +64,8 @@ export function ShippingAddressSection() {
       : null,
     receiverPhone: touched.receiverPhone && !receiverPhone
       ? "연락처를 입력해주세요."
-      : touched.receiverPhone && !/^\d{10,11}$/.test(receiverPhone)
-        ? "연락처는 10~11자리 숫자만 입력 가능합니다."
+      : touched.receiverPhone && !/^\d{11}$/.test(receiverPhone)
+        ? "연락처는 11자리 숫자만 입력 가능합니다."
         : null,
     addressDetail: touched.addressDetail && !addressDetail.trim()
       ? "상세주소를 입력해주세요."
@@ -77,7 +77,7 @@ export function ShippingAddressSection() {
 
   const isFormValid =
     receiverName.trim() !== "" &&
-    /^\d{10,11}$/.test(receiverPhone) &&
+    /^\d{11}$/.test(receiverPhone) &&
     address !== "" &&
     addressDetail.trim() !== "" &&
     /^\d{5}$/.test(zipcode)
