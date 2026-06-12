@@ -14,6 +14,13 @@ function formatPhone(digits: string): string {
   return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`
 }
 
+const inputBase =
+  "w-full rounded-inner border px-3 py-2.5 text-[13px] text-ink-1 outline-none"
+const inputNormal = `${inputBase} border-border bg-white focus:border-brand`
+const inputError = `${inputBase} border-red-400 bg-white focus:border-red-400`
+const inputReadonly = `${inputBase} border-border bg-surface`
+const errorMsg = "mt-1 text-[11px] text-red-500"
+
 export function ShippingAddressSection() {
   const {
     shippingAddress,
@@ -37,6 +44,43 @@ export function ShippingAddressSection() {
   const [address, setAddress] = useState("")
   const [addressDetail, setAddressDetail] = useState("")
   const [zipcode, setZipcode] = useState("")
+
+  // touched 상태 — 포커스 후 blur 시 true
+  const [touched, setTouched] = useState({
+    receiverName: false,
+    receiverPhone: false,
+    addressDetail: false,
+    zipcode: false,
+  })
+
+  function markTouched(field: keyof typeof touched) {
+    setTouched((prev) => ({ ...prev, [field]: true }))
+  }
+
+  // 검증 함수
+  const errors = {
+    receiverName: touched.receiverName && !receiverName.trim()
+      ? "수령인 이름을 입력해주세요."
+      : null,
+    receiverPhone: touched.receiverPhone && !receiverPhone
+      ? "연락처를 입력해주세요."
+      : touched.receiverPhone && !/^\d{10,11}$/.test(receiverPhone)
+        ? "연락처는 10~11자리 숫자만 입력 가능합니다."
+        : null,
+    addressDetail: touched.addressDetail && !addressDetail.trim()
+      ? "상세주소를 입력해주세요."
+      : null,
+    zipcode: touched.zipcode && !/^\d{5}$/.test(zipcode)
+      ? "우편번호 검색을 해주세요."
+      : null,
+  }
+
+  const isFormValid =
+    receiverName.trim() !== "" &&
+    /^\d{10,11}$/.test(receiverPhone) &&
+    address !== "" &&
+    addressDetail.trim() !== "" &&
+    /^\d{5}$/.test(zipcode)
 
   useEffect(() => {
     getShippingAddress()
@@ -69,12 +113,20 @@ export function ShippingAddressSection() {
   }, [showPostcode])
 
   function handleFormSubmit() {
-    if (!receiverName || !receiverPhone || !address || !zipcode) return
+    // 모든 필드 touched 처리
+    setTouched({
+      receiverName: true,
+      receiverPhone: true,
+      addressDetail: true,
+      zipcode: true,
+    })
+    if (!isFormValid) return
+
     const addr: ShippingAddress = {
-      receiverName,
+      receiverName: receiverName.trim(),
       receiverPhone,
       address,
-      addressDetail: addressDetail || null,
+      addressDetail: addressDetail.trim(),
       zipcode,
     }
     setShippingAddress(addr)
@@ -130,7 +182,7 @@ export function ShippingAddressSection() {
                 <p className="text-[14px] font-semibold text-ink-1">
                   {shippingAddress?.receiverName}
                   <span className="ml-2 text-ink-muted font-normal">
-                    {shippingAddress?.receiverPhone}
+                    {formatPhone(shippingAddress?.receiverPhone ?? "")}
                   </span>
                 </p>
                 <p className="mt-1 text-[13px] text-ink-2">
@@ -165,6 +217,7 @@ export function ShippingAddressSection() {
 
         {showForm && (
           <div className="space-y-4">
+            {/* 우편번호 */}
             <div>
               <label className="mb-1 block text-[12px] font-medium text-ink-muted">우편번호</label>
               <div className="flex items-center gap-2">
@@ -172,16 +225,20 @@ export function ShippingAddressSection() {
                   value={zipcode}
                   readOnly
                   placeholder="우편번호"
-                  className="flex-1 h-[42px] rounded-inner border border-border bg-surface px-3 text-[13px] text-ink-1"
+                  onBlur={() => markTouched("zipcode")}
+                  className={`flex-1 h-[42px] px-3 text-[13px] text-ink-1 rounded-inner border ${
+                    errors.zipcode ? "border-red-400 bg-surface" : "border-border bg-surface"
+                  }`}
                 />
                 <Button
                   type="button"
                   onClick={() => setShowPostcode(true)}
-                  className="shrink-0 h-[42px] rounded-inner bg-brand px-5 text-[13px] font-medium text-white hover:bg-brand-dark"
+                  className="shrink-0 !h-[42px] rounded-inner bg-brand px-5 text-[13px] font-medium text-white hover:bg-brand-dark"
                 >
                   우편번호 찾기
                 </Button>
               </div>
+              {errors.zipcode && <p className={errorMsg}>{errors.zipcode}</p>}
               {showPostcode && (
                 <div
                   ref={postcodeRef}
@@ -191,47 +248,58 @@ export function ShippingAddressSection() {
               )}
             </div>
 
+            {/* 기본주소 */}
             <div>
               <label className="mb-1 block text-[12px] font-medium text-ink-muted">기본주소</label>
               <input
                 value={address}
                 readOnly
                 placeholder="우편번호 검색 후 자동 입력됩니다"
-                className="w-full rounded-inner border border-border bg-surface px-3 py-2.5 text-[13px] text-ink-1"
+                className={inputReadonly}
               />
             </div>
 
+            {/* 상세주소 */}
             <div>
               <label className="mb-1 block text-[12px] font-medium text-ink-muted">상세주소</label>
               <input
                 value={addressDetail}
                 onChange={(e) => setAddressDetail(e.target.value)}
+                onBlur={() => markTouched("addressDetail")}
                 placeholder="동, 호수 등 상세 주소를 입력하세요"
-                className="w-full rounded-inner border border-border bg-white px-3 py-2.5 text-[13px] text-ink-1 outline-none focus:border-brand"
+                className={errors.addressDetail ? inputError : inputNormal}
               />
+              {errors.addressDetail && <p className={errorMsg}>{errors.addressDetail}</p>}
             </div>
 
+            {/* 수령인 */}
             <div>
               <label className="mb-1 block text-[12px] font-medium text-ink-muted">수령인</label>
               <input
                 value={receiverName}
                 onChange={(e) => setReceiverName(e.target.value)}
+                onBlur={() => markTouched("receiverName")}
                 placeholder="수령인 이름"
-                className="w-full rounded-inner border border-border bg-white px-3 py-2.5 text-[13px] text-ink-1 outline-none focus:border-brand"
+                className={errors.receiverName ? inputError : inputNormal}
               />
+              {errors.receiverName && <p className={errorMsg}>{errors.receiverName}</p>}
             </div>
 
+            {/* 연락처 */}
             <div>
               <label className="mb-1 block text-[12px] font-medium text-ink-muted">연락처</label>
               <input
                 value={formatPhone(receiverPhone)}
                 onChange={(e) => setReceiverPhone(e.target.value.replace(/\D/g, "").slice(0, 11))}
+                onBlur={() => markTouched("receiverPhone")}
                 inputMode="numeric"
                 placeholder="01012345678"
-                className="w-full rounded-inner border border-border bg-white px-3 py-2.5 text-[13px] text-ink-1 outline-none focus:border-brand"
+                className={errors.receiverPhone ? inputError : inputNormal}
               />
+              {errors.receiverPhone && <p className={errorMsg}>{errors.receiverPhone}</p>}
             </div>
 
+            {/* 기본 배송지로 저장 */}
             <label className="flex items-center gap-2 text-[13px] text-ink-2 cursor-pointer">
               <input
                 type="checkbox"
@@ -242,9 +310,10 @@ export function ShippingAddressSection() {
               기본 배송지로 저장하기
             </label>
 
+            {/* 배송지 확인 버튼 */}
             <Button
               onClick={handleFormSubmit}
-              disabled={!receiverName || !receiverPhone || !address || !zipcode}
+              disabled={!isFormValid}
               className="w-full rounded-inner bg-brand py-3 text-[14px] font-bold text-white hover:bg-brand-dark disabled:bg-ink-muted/30"
             >
               배송지 확인
