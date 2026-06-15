@@ -6,12 +6,15 @@ import { won } from "@/lib/format"
 import styles from "./OrdersTable.module.css"
 
 interface OrdersTableProps {
+  // 서버에서 받은 "현재 페이지"의 주문들 (클라이언트 슬라이싱 안 함)
   orders: AdminOrder[]
   selected: Set<string>
   setSelected: (s: Set<string>) => void
-  page: number
+  page: number // 1-base (UI)
   setPage: (p: number) => void
   perPage: number
+  totalCount: number
+  totalPages: number
 }
 
 type CbxState = "on" | "off" | "mixed"
@@ -65,6 +68,8 @@ export function OrdersTable({
   page,
   setPage,
   perPage,
+  totalCount,
+  totalPages,
 }: OrdersTableProps) {
   const allIds = orders.map((o) => o.orderId)
   const selCount = allIds.filter((id) => selected.has(id)).length
@@ -91,9 +96,10 @@ export function OrdersTable({
     setSelected(next)
   }
 
-  const totalPages = Math.max(1, Math.ceil(orders.length / perPage))
+  // 서버 페이징: orders 가 이미 현재 페이지의 행들이다. 슬라이싱 안 함.
+  const pageCount = Math.max(1, totalPages)
   const start = (page - 1) * perPage
-  const rows = orders.slice(start, start + perPage)
+  const rows = orders
 
   return (
     <div className={styles.tableCard}>
@@ -211,12 +217,9 @@ export function OrdersTable({
       <div className={styles.tblFoot}>
         <div>
           전체{" "}
-          <strong style={{ color: "var(--d-ink)" }}>{orders.length}</strong>건
-          중{" "}
-          {orders.length === 0
-            ? "0"
-            : `${start + 1}–${Math.min(start + perPage, orders.length)}`}
-          건 표시
+          <strong style={{ color: "var(--d-ink)" }}>{totalCount}</strong>건 중{" "}
+          {totalCount === 0 ? "0" : `${start + 1}–${start + orders.length}`}건
+          표시
         </div>
         <div className={styles.pager}>
           <button
@@ -227,7 +230,7 @@ export function OrdersTable({
           >
             ‹
           </button>
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+          {Array.from({ length: pageCount }, (_, i) => i + 1).map((p) => (
             <button
               key={p}
               type="button"
@@ -240,7 +243,7 @@ export function OrdersTable({
           <button
             type="button"
             className={styles.pagerBtn}
-            disabled={page >= totalPages}
+            disabled={page >= pageCount}
             onClick={() => setPage(page + 1)}
           >
             ›

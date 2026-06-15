@@ -1,5 +1,13 @@
 /* Orders & Shipping Management Page */
 
+/* Loading / fallback */
+.loading {
+  padding: 64px 20px;
+  text-align: center;
+  color: var(--d-ink-3, #8a8178);
+  font-size: 14px;
+}
+
 /* Page header */
 .pageHead {
   display: flex;

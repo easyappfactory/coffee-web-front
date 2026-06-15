@@ -1,13 +1,14 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Download, Upload, Search, Clock } from "lucide-react"
-import type { AdminOrder, AdminOrderTab, SlotPhase } from "@/types/adminOrder"
+import type { AdminOrderTab, SlotPhase, AdminSlotSummary } from "@/types/adminOrder"
+import { POC_USERS } from "@/lib/api"
 import {
-  MOCK_ADMIN_SLOTS,
-  MOCK_ADMIN_ORDERS,
-  MOCK_ADMIN_SUMMARIES,
-} from "@/lib/mock/adminOrders"
+  useAdminSlots,
+  useAdminSlotSummary,
+  useAdminSlotOrders,
+} from "@/hooks/useAdminOrders"
 import { SlotSelect } from "@/components/manager/SlotSelect"
 import { SlotStatStrip } from "@/components/manager/SlotStatStrip"
 import { OrdersTable } from "@/components/manager/OrdersTable"
@@ -15,14 +16,7 @@ import styles from "./orders.module.css"
 
 const PER_PAGE = 8
 
-// ---------------------------------------------------------------------------
-// Tab config
-// ---------------------------------------------------------------------------
-const ALL_TABS: {
-  key: AdminOrderTab
-  label: string
-  alert?: boolean
-}[] = [
+const ALL_TABS: { key: AdminOrderTab; label: string; alert?: boolean }[] = [
   { key: "all", label: "전체" },
   { key: "funding", label: "펀딩 중" },
   { key: "pre", label: "송장 등록 전", alert: true },
@@ -39,40 +33,6 @@ const PHASE_TABS: Record<SlotPhase, AdminOrderTab[]> = {
   FAILED: ["all", "cancel"],
 }
 
-// ---------------------------------------------------------------------------
-// Tab matching logic — mirrors design's matchTab
-// ---------------------------------------------------------------------------
-function matchTab(order: AdminOrder, tab: AdminOrderTab): boolean {
-  switch (tab) {
-    case "all":
-      return true
-    case "funding":
-      return order.deliveryStatus === "funding"
-    case "cancel":
-      return order.deliveryStatus === "cancel"
-    case "exchange":
-      return order.deliveryStatus === "exchange"
-    case "pre":
-      return (
-        order.deliveryStatus !== "funding" &&
-        !order.trackingNumber &&
-        order.deliveryStatus !== "cancel" &&
-        order.deliveryStatus !== "exchange"
-      )
-    case "post":
-      return (
-        !!order.trackingNumber &&
-        order.deliveryStatus !== "cancel" &&
-        order.deliveryStatus !== "exchange"
-      )
-    default:
-      return true
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Phase badge class map
-// ---------------------------------------------------------------------------
 const PHASE_BADGE_CLASS: Record<SlotPhase, string> = {
   PRE: styles.phPRE,
   FUNDING: styles.phFUNDING,
@@ -81,53 +41,66 @@ const PHASE_BADGE_CLASS: Record<SlotPhase, string> = {
   FAILED: styles.phFAILED,
 }
 
-// ---------------------------------------------------------------------------
-// Page
-// ---------------------------------------------------------------------------
+// 탭 배지 건수 — 통계(summary)에서 도출 (목록 응답엔 탭별 건수가 없음)
+function tabCount(tab: AdminOrderTab, s?: AdminSlotSummary): number {
+  if (!s) return 0
+  switch (tab) {
+    case "all":
+      return s.totalCount
+    case "funding":
+      return s.fundingCount
+    case "pre":
+      return s.preCount
+    case "post":
+      return s.postCount
+    case "cancel":
+      return s.cancelCount
+    case "exchange":
+      return s.exchangeCount
+    default:
+      return 0
+  }
+}
+
 export default function ManageOrdersPage() {
-  // Start on the FUNDING slot so main content is visible immediately
-  const [slotId, setSlotId] = useState(MOCK_ADMIN_SLOTS[0].slotId)
+  // 매니저 POC 사용자 지정 (admin 엔드포인트 X-User-Id 헤더)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("pocUserId", POC_USERS.MANAGER)
+    }
+  }, [])
+
+  const slotsQuery = useAdminSlots()
+  const slots = useMemo(() => slotsQuery.data ?? [], [slotsQuery.data])
+
+  const [slotId, setSlotId] = useState<string | undefined>(undefined)
   const [tab, setTab] = useState<AdminOrderTab>("all")
   const [query, setQuery] = useState("")
-  const [page, setPage] = useState(1)
+  const [page, setPage] = useState(1) // 1-base (UI)
   const [selected, setSelected] = useState<Set<string>>(new Set())
 
-  const slot = MOCK_ADMIN_SLOTS.find((s) => s.slotId === slotId)!
-  const orders = MOCK_ADMIN_ORDERS[slotId] ?? []
-  const summary = MOCK_ADMIN_SUMMARIES[slotId]!
+  // 슬롯 로드되면 기본 선택 — 펀딩(FUNDING) 슬롯 우선, 없으면 첫 슬롯
+  useEffect(() => {
+    if (!slotId && slots.length > 0) {
+      const funding = slots.find((s) => s.phase === "FUNDING")
+      setSlotId((funding ?? slots[0]).slotId)
+    }
+  }, [slots, slotId])
 
-  const visibleTabs = ALL_TABS.filter((t) =>
-    PHASE_TABS[slot.phase].includes(t.key),
+  const slot = slots.find((s) => s.slotId === slotId)
+  const summaryQuery = useAdminSlotSummary(slotId)
+  const summary = summaryQuery.data
+  const ordersQuery = useAdminSlotOrders(
+    slotId,
+    tab,
+    query.trim() || undefined,
+    page - 1,
   )
+  const ordersPage = ordersQuery.data
 
-  // Per-tab counts
-  const counts = useMemo(() => {
-    const c: Partial<Record<AdminOrderTab, number>> = {}
-    ALL_TABS.forEach((t) => {
-      c[t.key] = orders.filter((o) => matchTab(o, t.key)).length
-    })
-    return c
-  }, [orders])
-
-  // Filtered + searched rows
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    return orders.filter((o) => {
-      if (!matchTab(o, tab)) return false
-      if (!q) return true
-      return [
-        o.orderNo,
-        o.receiverName,
-        o.receiverPhone,
-        o.trackingNumber,
-        o.address,
-        o.addressDetail,
-      ]
-        .join(" ")
-        .toLowerCase()
-        .includes(q)
-    })
-  }, [orders, tab, query])
+  const visibleTabs = slot
+    ? ALL_TABS.filter((t) => PHASE_TABS[slot.phase].includes(t.key))
+    : []
 
   function handleSlotChange(id: string) {
     setSlotId(id)
@@ -140,6 +113,19 @@ export default function ManageOrdersPage() {
   function handleTabChange(key: AdminOrderTab) {
     setTab(key)
     setPage(1)
+    setSelected(new Set())
+  }
+
+  if (slotsQuery.isLoading) {
+    return <div className={styles.loading}>슬롯을 불러오는 중…</div>
+  }
+  if (slotsQuery.isError) {
+    return (
+      <div className={styles.loading}>슬롯을 불러오지 못했습니다.</div>
+    )
+  }
+  if (!slot) {
+    return <div className={styles.loading}>표시할 슬롯이 없습니다.</div>
   }
 
   const isPre = slot.phase === "PRE"
@@ -179,11 +165,7 @@ export default function ManageOrdersPage() {
 
       {/* Slot selector + phase badge */}
       <div className={styles.slotbar}>
-        <SlotSelect
-          slots={MOCK_ADMIN_SLOTS}
-          value={slotId}
-          onChange={handleSlotChange}
-        />
+        <SlotSelect slots={slots} value={slot.slotId} onChange={handleSlotChange} />
         <span
           className={`${styles.phaseBadge} ${PHASE_BADGE_CLASS[slot.phase]}`}
         >
@@ -191,8 +173,8 @@ export default function ManageOrdersPage() {
         </span>
       </div>
 
-      {/* Stat strip — phase-aware */}
-      <SlotStatStrip slot={slot} summary={summary} />
+      {/* Stat strip — phase-aware (summary 로드 후) */}
+      {summary && <SlotStatStrip slot={slot} summary={summary} />}
 
       {/* PRE → empty state card */}
       {isPre ? (
@@ -202,10 +184,7 @@ export default function ManageOrdersPage() {
               <Clock size={26} />
             </div>
             <h4>아직 펀딩이 시작되지 않았습니다</h4>
-            <p>
-              {slot.deadline} 펀딩이 오픈되면 주문 내역이 이곳에
-              표시됩니다.
-            </p>
+            <p>{slot.deadline} 펀딩이 오픈되면 주문 내역이 이곳에 표시됩니다.</p>
           </div>
         </div>
       ) : (
@@ -227,7 +206,7 @@ export default function ManageOrdersPage() {
                   onClick={() => handleTabChange(t.key)}
                 >
                   {t.label}{" "}
-                  <span className={styles.cnt}>{counts[t.key] ?? 0}</span>
+                  <span className={styles.cnt}>{tabCount(t.key, summary)}</span>
                 </button>
               ))}
             </div>
@@ -246,16 +225,21 @@ export default function ManageOrdersPage() {
             </div>
           </div>
 
-          {/* Orders table
-              단건 등록/수정·일괄선택바·배송조회팝업·송장모달은 다음 슬라이스 */}
-          <OrdersTable
-            orders={filtered}
-            selected={selected}
-            setSelected={setSelected}
-            page={page}
-            setPage={setPage}
-            perPage={PER_PAGE}
-          />
+          {/* Orders table — 서버 페이징 (단건/일괄/배송조회 팝업은 다음 슬라이스) */}
+          {ordersQuery.isError ? (
+            <div className={styles.loading}>주문을 불러오지 못했습니다.</div>
+          ) : (
+            <OrdersTable
+              orders={ordersPage?.orders ?? []}
+              selected={selected}
+              setSelected={setSelected}
+              page={page}
+              setPage={setPage}
+              perPage={PER_PAGE}
+              totalCount={ordersPage?.totalCount ?? 0}
+              totalPages={ordersPage?.totalPages ?? 1}
+            />
+          )}
         </>
       )}
 

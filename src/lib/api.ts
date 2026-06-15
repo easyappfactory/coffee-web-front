@@ -9,6 +9,12 @@ import type { Slot, SlotDetail } from "@/types/slot";
 import type { FundingStatus, Reward } from "@/types/funding";
 import type { Master } from "@/types/user";
 import type { ShippingAddress, SaveShippingAddressRequest } from "@/types/shipping";
+import type {
+  AdminSlot,
+  AdminSlotSummary,
+  AdminOrderTab,
+  AdminOrderPage,
+} from "@/types/adminOrder";
 
 export const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080",
@@ -391,5 +397,34 @@ export async function getOrderDetail(orderId: string) {
 
 export async function getOrderTracking(orderId: string) {
   const res = await apiClient.get(`${API_PREFIX}/orders/${orderId}/tracking`)
+  return res.data.data
+}
+
+// ── 판매자 어드민 주문·배송 관리 API (읽기) ──────────────────────────────────
+
+export async function getAdminSlots(): Promise<AdminSlot[]> {
+  const res = await apiClient.get(`${API_PREFIX}/admin/slots`)
+  return res.data.data.slots
+}
+
+export async function getAdminSlotSummary(
+  slotId: string,
+): Promise<AdminSlotSummary> {
+  const res = await apiClient.get(`${API_PREFIX}/admin/slots/${slotId}/summary`)
+  return res.data.data
+}
+
+export async function getAdminSlotOrders(
+  slotId: string,
+  tab: AdminOrderTab = "all",
+  q?: string,
+  page = 0,
+  size = 8,
+): Promise<AdminOrderPage> {
+  const params: Record<string, string | number> = { tab, page, size }
+  if (q) params.q = q
+  const res = await apiClient.get(`${API_PREFIX}/admin/slots/${slotId}/orders`, {
+    params,
+  })
   return res.data.data
 }
