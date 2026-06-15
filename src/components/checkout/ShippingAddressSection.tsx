@@ -86,10 +86,12 @@ export function ShippingAddressSection() {
     getShippingAddress()
       .then((addr) => {
         setSavedAddress(addr)
-        if (addr && !shippingAddress) {
+        if (shippingAddress) {
+          // persist된 배송지가 있으면 isShippingReady를 재계산해 동기화
+          setShippingAddress(shippingAddress)
+        } else if (addr) {
           setShippingAddress(addr)
-        }
-        if (!addr) {
+        } else {
           setShowForm(true)
         }
       })
