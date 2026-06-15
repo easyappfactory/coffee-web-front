@@ -373,3 +373,23 @@ export async function saveShippingAddress(data: SaveShippingAddressRequest): Pro
   const res = await apiClient.put(`${API_PREFIX}/members/me/shipping-address`, data)
   return res.data.data
 }
+
+// ── 주문 조회 API ─────────────────────────────────────────────────────────────
+
+export async function getOrders(cursor?: string | null, size: number = 20, status?: string) {
+  const params: Record<string, string | number> = { size }
+  if (cursor) params.cursor = cursor
+  if (status) params.status = status
+  const res = await apiClient.get("/internal-api/v1/orders", { params })
+  return res.data.data
+}
+
+export async function getOrderDetail(orderId: string) {
+  const res = await apiClient.get(`/internal-api/v1/orders/${orderId}`)
+  return res.data.data
+}
+
+export async function getOrderTracking(orderId: string) {
+  const res = await apiClient.get(`/internal-api/v1/orders/${orderId}/tracking`)
+  return res.data.data
+}
