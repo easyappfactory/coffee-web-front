@@ -47,9 +47,14 @@ export function TrackingModal({ open, onClose, orderId }: TrackingModalProps) {
                   {tracking.tracks.map((track, index) => (
                     <div key={index} className="flex gap-3">
                       <div className="flex flex-col items-center">
-                        <div
-                          className={`mt-1.5 h-2.5 w-2.5 rounded-full ${index === 0 ? "bg-green-500" : "bg-gray-300"}`}
-                        />
+                        {index === 0 ? (
+                          <div className="relative mt-1 flex h-3.5 w-3.5 items-center justify-center">
+                            <div className="absolute h-3.5 w-3.5 animate-ping rounded-full bg-green-400 opacity-30" />
+                            <div className="h-2.5 w-2.5 rounded-full bg-green-500" />
+                          </div>
+                        ) : (
+                          <div className="mt-1.5 h-2.5 w-2.5 rounded-full bg-gray-300" />
+                        )}
                         {index < tracking.tracks.length - 1 && <div className="w-px flex-1 bg-gray-200" />}
                       </div>
                       <div className="pb-4">
