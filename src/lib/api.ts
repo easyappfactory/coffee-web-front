@@ -380,16 +380,16 @@ export async function getOrders(cursor?: string | null, size: number = 20, statu
   const params: Record<string, string | number> = { size }
   if (cursor) params.cursor = cursor
   if (status) params.status = status
-  const res = await apiClient.get("/internal-api/v1/orders", { params })
+  const res = await apiClient.get(`${API_PREFIX}/orders`, { params })
   return res.data.data
 }
 
 export async function getOrderDetail(orderId: string) {
-  const res = await apiClient.get(`/internal-api/v1/orders/${orderId}`)
+  const res = await apiClient.get(`${API_PREFIX}/orders/${orderId}`)
   return res.data.data
 }
 
 export async function getOrderTracking(orderId: string) {
-  const res = await apiClient.get(`/internal-api/v1/orders/${orderId}/tracking`)
+  const res = await apiClient.get(`${API_PREFIX}/orders/${orderId}/tracking`)
   return res.data.data
 }
