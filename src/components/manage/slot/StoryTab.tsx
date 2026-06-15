@@ -22,6 +22,7 @@ export function StoryTab() {
       : null
 
   function addTag(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.nativeEvent.isComposing) return
     if (e.key !== "Enter") return
     e.preventDefault()
     const tag = tagInput.trim().replace(/^#/, "")

@@ -15,7 +15,7 @@ export function CommentInput({ onSubmit, isPending, replyTo, onCancelReply }: Co
   const [text, setText] = useState("");
 
   async function handleSubmit() {
-    if (!text.trim()) return;
+    if (!text.trim() || isPending) return;
     await onSubmit(text.trim(), replyTo?.id);
     setText("");
     onCancelReply?.();
@@ -37,7 +37,13 @@ export function CommentInput({ onSubmit, isPending, replyTo, onCancelReply }: Co
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSubmit()}
+          onKeyDown={(e) => {
+            if (e.nativeEvent.isComposing) return;
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              handleSubmit();
+            }
+          }}
           placeholder={replyTo ? "답글을 입력하세요..." : "댓글을 입력하세요..."}
           className="flex-1 rounded-inner border border-border bg-transparent px-3 py-2 text-[13px] text-ink-1 placeholder:text-ink-muted focus:outline-none focus:ring-1 focus:ring-brand/30"
         />
