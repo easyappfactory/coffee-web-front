@@ -7,7 +7,8 @@ export function useOrders() {
     queryKey: ["orders"],
     queryFn: ({ pageParam }) => getOrders(pageParam as string | null),
     initialPageParam: null as string | null,
-    getNextPageParam: (lastPage) => lastPage.hasNext ? lastPage.nextCursor : undefined,
+    getNextPageParam: (lastPage) =>
+      lastPage.meta?.hasNext ? lastPage.meta.nextCursor : undefined,
   })
 }
 

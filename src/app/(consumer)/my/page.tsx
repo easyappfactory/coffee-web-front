@@ -16,7 +16,8 @@ export default function MyPage() {
     }
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage])
 
-  const orders = data?.pages.flatMap((page) => page.data) ?? []
+  const orders =
+    data?.pages.flatMap((page) => page?.data ?? []).filter(Boolean) ?? []
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">

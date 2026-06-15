@@ -381,7 +381,7 @@ export async function getOrders(cursor?: string | null, size: number = 20, statu
   if (cursor) params.cursor = cursor
   if (status) params.status = status
   const res = await apiClient.get(`${API_PREFIX}/orders`, { params })
-  return res.data.data
+  return res.data
 }
 
 export async function getOrderDetail(orderId: string) {

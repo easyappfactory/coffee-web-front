@@ -75,10 +75,19 @@ export type OrderStatus =
   | "EXCHANGE_RE_PREPARING"
   | "EXCHANGE_IN_TRANSIT"
 
-export interface CursorPageResponse<T> {
-  data: T[]
+export interface CursorMeta {
   nextCursor: string | null
   hasNext: boolean
+  reqSize: number
+  resCount: number
+}
+
+export interface CursorPageResponse<T> {
+  success: boolean
+  code: string
+  message: string
+  data: T[]
+  meta: CursorMeta
 }
 
 export interface TrackingResponse {
