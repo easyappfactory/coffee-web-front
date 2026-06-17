@@ -134,7 +134,9 @@ function CurrentStepLottie({ lottie: lottiePath, fallbackIcon: Icon }: { lottie:
   }, [lottiePath, animationData])
 
   return (
-    <div className="relative flex h-10 w-10 items-center justify-center">
+    // h-10(40px) 박스라 그래픽 중심이 20px → 다른 아이콘(h-8, 중심 16px) 및 연결선과
+    // 맞도록 4px 위로 올린다
+    <div className="relative flex h-10 w-10 -translate-y-1 items-center justify-center">
       {/* 글로우 링 */}
       <div className="absolute h-10 w-10 animate-ping rounded-full bg-green-400 opacity-15" />
       <div className="absolute h-10 w-10 animate-pulse rounded-full bg-green-50" />

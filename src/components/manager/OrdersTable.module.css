@@ -1,0 +1,281 @@
+/* OrdersTable — 주문 목록 테이블 + 번호 페이저 */
+
+.tableCard {
+  margin-top: 18px;
+  background: var(--d-surface);
+  border: 1px solid var(--d-line);
+  border-radius: 16px;
+  box-shadow: var(--d-shadow-card);
+  overflow: hidden;
+}
+
+.tblScroll {
+  overflow-x: auto;
+}
+
+/* Table */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 940px;
+}
+
+.table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--d-surface-2);
+  z-index: 1;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--d-ink-3);
+  letter-spacing: 0.01em;
+  text-align: left;
+  padding: 13px;
+  border-bottom: 1px solid var(--d-line-2);
+  white-space: nowrap;
+}
+
+.table tbody td {
+  padding: 15px 13px;
+  border-bottom: 1px solid var(--d-line);
+  vertical-align: top;
+  font-size: 13.5px;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr {
+  transition: background 0.12s;
+}
+
+.table tbody tr:hover {
+  background: var(--d-surface-2);
+}
+
+.rowSel {
+  background: var(--d-brown-soft) !important;
+}
+
+.colCheck {
+  width: 44px;
+  padding-left: 18px !important;
+}
+
+/* Checkbox */
+.cbx {
+  width: 19px;
+  height: 19px;
+  border-radius: 6px;
+  border: 1.6px solid var(--d-line-strong);
+  background: var(--d-surface);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.12s;
+  flex-shrink: 0;
+  color: transparent;
+  font-family: inherit;
+  padding: 0;
+}
+.cbx:hover {
+  border-color: var(--d-brown);
+}
+.cbxOn {
+  background: var(--d-brown);
+  border-color: var(--d-brown);
+  color: #fff;
+}
+.cbxMixed {
+  background: var(--d-brown);
+  border-color: var(--d-brown);
+  color: #fff;
+}
+
+/* Cell content */
+.ono {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-size: 13.5px;
+  color: var(--d-ink);
+  font-variant-numeric: tabular-nums;
+}
+.odate {
+  font-size: 12px;
+  color: var(--d-ink-3);
+  margin-top: 3px;
+  font-variant-numeric: tabular-nums;
+}
+.custNm {
+  font-weight: 700;
+}
+.custPh {
+  font-size: 12.5px;
+  color: var(--d-ink-2);
+  margin-top: 3px;
+  font-variant-numeric: tabular-nums;
+}
+.addr {
+  color: var(--d-ink-2);
+  line-height: 1.45;
+  max-width: 175px;
+  font-size: 13px;
+}
+.zip {
+  font-size: 11.5px;
+  color: var(--d-ink-4);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.prodNm {
+  font-weight: 700;
+  line-height: 1.35;
+  max-width: 188px;
+}
+.prodOpt {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--d-ink-2);
+  margin-top: 5px;
+  background: var(--d-tile);
+  border-radius: 6px;
+  padding: 2px 7px;
+  white-space: nowrap;
+}
+.qty {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 12.5px;
+  color: var(--d-ink-2);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.memo {
+  color: var(--d-ink-2);
+  line-height: 1.4;
+  max-width: 170px;
+  font-size: 12.5px;
+}
+.memoEmpty {
+  color: var(--d-ink-4);
+}
+.invCourier {
+  font-size: 12px;
+  color: var(--d-ink-3);
+  font-weight: 600;
+}
+.invNo {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-top: 3px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.invEmpty {
+  color: var(--d-ink-4);
+  font-weight: 600;
+}
+
+/* Track button */
+.trackBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  font-size: 13px;
+  color: var(--d-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--d-line-strong);
+  text-decoration-thickness: 1.5px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
+  transition: color 0.12s;
+}
+.trackBtn:hover {
+  color: var(--d-brown);
+  text-decoration-color: var(--d-brown);
+}
+
+/* Empty state */
+.emptyState {
+  padding: 70px 20px;
+  text-align: center;
+  color: var(--d-ink-3);
+}
+.emptyIc {
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  background: var(--d-tile);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--d-ink-4);
+  margin-bottom: 14px;
+}
+.emptyState h4 {
+  margin: 0 0 5px;
+  font-size: 16px;
+  color: var(--d-ink);
+  font-weight: 700;
+}
+.emptyState p {
+  margin: 0;
+  font-size: 13.5px;
+}
+
+/* Table footer */
+.tblFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-top: 1px solid var(--d-line);
+  font-size: 13px;
+  color: var(--d-ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Pager */
+.pager {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.pagerBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  color: var(--d-ink-2);
+  font-weight: 700;
+  font-size: 13px;
+  transition: background 0.12s;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pagerBtn:hover {
+  background: var(--d-surface-2);
+}
+.pagerBtnOn {
+  background: var(--d-ink) !important;
+  color: #f7f3ef !important;
+}
+.pagerBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
