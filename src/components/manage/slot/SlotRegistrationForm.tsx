@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils"
 import { StoryTab } from "./StoryTab"
 import { FlavorTab } from "./FlavorTab"
 import { PricingTab } from "./PricingTab"
+import { FundingScheduleModal } from "./FundingScheduleModal"
 import { useCreateSlot } from "@/hooks/useCreateSlot"
 import type { SlotRegistrationFormData } from "@/types/slotRegistration"
 
@@ -20,6 +21,7 @@ type FormTabId = (typeof FORM_TABS)[number]["id"]
 
 export function SlotRegistrationForm() {
   const [activeTab, setActiveTab] = useState<FormTabId>("story")
+  const [modalOpen, setModalOpen] = useState(false)
   const { mutate, isPending } = useCreateSlot()
 
   const methods = useForm<SlotRegistrationFormData>({
@@ -40,19 +42,22 @@ export function SlotRegistrationForm() {
           maxQuantity: 10,
         },
       ],
-      deadline: "",
+      fundingStartDate: "",
+      fundingEndDate: "",
+      minFundingAmount: 0,
+      maxFundingAmount: null,
     },
   })
 
   const blendName = methods.watch("blendName") ?? ""
   const blendStory = methods.watch("blendStory") ?? ""
   const pricingOptions = methods.watch("pricingOptions") ?? []
-  const deadline = methods.watch("deadline") ?? ""
+  const minFundingAmount = methods.watch("minFundingAmount") ?? 0
 
   const isFormReady =
     blendName.trim().length > 0 &&
     blendStory.trim().length > 0 &&
-    deadline.trim().length > 0 &&
+    minFundingAmount >= 1 &&
     pricingOptions.length > 0 &&
     pricingOptions.every(
       (opt) =>
@@ -64,6 +69,62 @@ export function SlotRegistrationForm() {
         Number(opt.maxQuantity) >= Number(opt.minQuantity),
     )
 
+  function handleRegisterClick() {
+    const values = methods.getValues()
+
+    if (!values.blendName.trim() || !values.blendStory.trim()) {
+      setActiveTab("story")
+      alert("스토리 정보(블렌드명, 이야기)를 입력해주세요.")
+      return
+    }
+
+    if (
+      values.pricingOptions.length === 0 ||
+      !values.pricingOptions.every(
+        (opt) =>
+          (opt.weight ?? "").trim().length > 0 &&
+          Number(opt.earlybird) > 0 &&
+          Number(opt.second) > 0 &&
+          Number(opt.final) > 0 &&
+          Number(opt.minQuantity) > 0 &&
+          Number(opt.maxQuantity) >= Number(opt.minQuantity),
+      )
+    ) {
+      setActiveTab("pricing")
+      alert("가격 옵션을 올바르게 입력해주세요.")
+      return
+    }
+
+    if (!values.minFundingAmount || values.minFundingAmount < 1) {
+      setActiveTab("pricing")
+      alert("최소 펀딩 금액을 1원 이상으로 입력해주세요.")
+      return
+    }
+
+    if (
+      values.maxFundingAmount !== null &&
+      values.maxFundingAmount < values.minFundingAmount
+    ) {
+      setActiveTab("pricing")
+      alert("최대 펀딩 금액이 최소 금액보다 작을 수 없습니다.")
+      return
+    }
+
+    setModalOpen(true)
+  }
+
+  function handleModalConfirm({
+    fundingStartDate,
+    fundingEndDate,
+  }: {
+    fundingStartDate: string
+    fundingEndDate: string
+  }) {
+    methods.setValue("fundingStartDate", fundingStartDate)
+    methods.setValue("fundingEndDate", fundingEndDate)
+    methods.handleSubmit(onSubmit)()
+  }
+
   function onSubmit(data: SlotRegistrationFormData) {
     mutate(
       {
@@ -71,7 +132,10 @@ export function SlotRegistrationForm() {
         blendStory: data.blendStory,
         hashtags: data.hashtags,
         flavor: data.flavor,
-        deadline: data.deadline,
+        fundingStartDate: data.fundingStartDate,
+        deadline: data.fundingEndDate,
+        minFundingAmount: data.minFundingAmount,
+        maxFundingAmount: data.maxFundingAmount,
         pricingOptions: data.pricingOptions.map((opt) => ({
           weight: opt.weight,
           earlybird: opt.earlybird,
@@ -85,6 +149,7 @@ export function SlotRegistrationForm() {
         onSuccess: () => {
           alert("슬롯이 등록되었습니다!")
           methods.reset()
+          setModalOpen(false)
         },
       },
     )
@@ -92,7 +157,7 @@ export function SlotRegistrationForm() {
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit(onSubmit)}>
+      <form onSubmit={(e) => e.preventDefault()}>
         {/* 고정 헤더: 타이틀 + 버튼 */}
         <div className="mb-10 flex items-start justify-between">
           <div>
@@ -106,19 +171,21 @@ export function SlotRegistrationForm() {
           {isFormReady && !isPending ? (
             <div className="animate-border-spin shrink-0 rounded-xl p-[2px]">
               <button
-                type="submit"
+                type="button"
+                onClick={handleRegisterClick}
                 className="relative rounded-[10px] bg-brand px-10 py-3 text-sm font-bold text-white transition-all active:scale-[0.97]"
               >
-                {isPending ? "등록 중..." : "블렌드 등록"}
+                블렌드 등록
               </button>
             </div>
           ) : (
             <button
-              type="submit"
-              disabled
+              type="button"
+              disabled={isPending}
+              onClick={handleRegisterClick}
               className="shrink-0 cursor-not-allowed rounded-xl border border-border bg-surface px-10 py-3 text-sm font-bold text-brand/40"
             >
-              블렌드 등록
+              {isPending ? "등록 중..." : "블렌드 등록"}
             </button>
           )}
         </div>
@@ -156,6 +223,14 @@ export function SlotRegistrationForm() {
           </div>
         </div>
       </form>
+
+      {/* 펀딩 일정 모달 */}
+      <FundingScheduleModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onConfirm={handleModalConfirm}
+        submitting={isPending}
+      />
     </FormProvider>
   )
 }

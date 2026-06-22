@@ -174,7 +174,10 @@ export async function createSlot(
       nutty: data.flavor.nutty,
       roastLevel: data.flavor.roastLevel,
     },
+    fundingStartDate: data.fundingStartDate,
     deadline: data.deadline,
+    minFundingAmount: data.minFundingAmount,
+    maxFundingAmount: data.maxFundingAmount,
     variants: data.pricingOptions.map((opt) => ({
       variantCode: opt.weight,
       price: opt.earlybird,
