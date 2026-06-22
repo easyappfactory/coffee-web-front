@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
+import axios from "axios"
 import { RadarChart } from "./RadarChart"
 import { FlavorBars } from "./FlavorBars"
 import { RoastingLevel } from "./RoastingLevel"
@@ -48,6 +49,7 @@ export function SlotDetailTabs({ slot, slotId, communityQuery }: SlotDetailTabsP
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>("스토리")
   const [selectedReward, setSelectedReward] = useState<string | null>(null)
   const [isOrdering, setIsOrdering] = useState(false)
+  const [orderError, setOrderError] = useState<string | null>(null)
 
   const { data: fundingData } = useFunding(slotId)
 
@@ -70,6 +72,7 @@ export function SlotDetailTabs({ slot, slotId, communityQuery }: SlotDetailTabsP
   async function handleFunding() {
     if (!activeReward) return
     setIsOrdering(true)
+    setOrderError(null)
     try {
       const { orderId } = await reservePayment(SERVICE_ID, activeReward.variantId, quantity)
       setOrderId(orderId)
@@ -81,6 +84,15 @@ export function SlotDetailTabs({ slot, slotId, communityQuery }: SlotDetailTabsP
       setSlotThumbnail(slot.thumbnailUrl ?? "")
       setMasterName(slot.master.name)
       router.push("/checkout")
+    } catch (err) {
+      const serverMessage = axios.isAxiosError(err)
+        ? (err.response?.data?.message as string | undefined)
+        : undefined
+      if (serverMessage === "펀딩 중인 슬롯만 주문할 수 있습니다.") {
+        setOrderError("펀딩이 마감되어 주문할 수 없습니다.")
+      } else {
+        setOrderError(serverMessage ?? "주문 처리 중 오류가 발생했습니다.")
+      }
     } finally {
       setIsOrdering(false)
     }
@@ -306,6 +318,11 @@ export function SlotDetailTabs({ slot, slotId, communityQuery }: SlotDetailTabsP
                 </div>
 
                 {/* CTA */}
+                {orderError && (
+                  <div className="mb-4 rounded-inner border border-red-200 bg-red-50 px-5 py-4">
+                    <p className="text-[13px] font-medium text-red-700">{orderError}</p>
+                  </div>
+                )}
                 {funding.daysLeft > 0 ? (
                   <Button
                     onClick={handleFunding}
