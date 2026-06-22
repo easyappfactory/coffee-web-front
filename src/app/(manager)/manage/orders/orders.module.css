@@ -124,6 +124,10 @@
   color: #7c726a;
   background: #ece7e1;
 }
+.phPENDING {
+  color: #6d5ca8;
+  background: #f0ebfa;
+}
 .phFAILED {
   color: var(--d-red);
   background: var(--d-red-bg);

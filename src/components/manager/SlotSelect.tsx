@@ -11,11 +11,12 @@ interface SlotSelectProps {
   onChange: (slotId: string) => void
 }
 
-const PHASE_ORDER: SlotPhase[] = ["FUNDING", "OPERATING", "PRE", "CLOSED", "FAILED"]
+const PHASE_ORDER: SlotPhase[] = ["FUNDING", "PENDING", "OPERATING", "PRE", "CLOSED", "FAILED"]
 
 const PHASE_LABELS: Record<SlotPhase, string> = {
   PRE: "펀딩 전",
   FUNDING: "펀딩 중",
+  PENDING: "확정 대기",
   OPERATING: "운영 중",
   CLOSED: "종료",
   FAILED: "펀딩 실패",
@@ -24,6 +25,7 @@ const PHASE_LABELS: Record<SlotPhase, string> = {
 const PHASE_CLASS: Record<SlotPhase, string> = {
   PRE: styles.phPRE,
   FUNDING: styles.phFUNDING,
+  PENDING: styles.phPENDING,
   OPERATING: styles.phOPERATING,
   CLOSED: styles.phCLOSED,
   FAILED: styles.phFAILED,
