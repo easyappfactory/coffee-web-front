@@ -14,6 +14,7 @@ import type {
   AdminSlotSummary,
   AdminOrderTab,
   AdminOrderPage,
+  SlotFundingStatus,
 } from "@/types/adminOrder";
 
 export const apiClient = axios.create({
@@ -430,4 +431,27 @@ export async function getAdminSlotOrders(
     params,
   })
   return res.data.data
+}
+
+// ── 슬롯 펀딩 상태 전이 API ────────────────────────────────────────────────────
+
+export async function getSlotFundingStatus(slotId: string): Promise<SlotFundingStatus> {
+  const res = await apiClient.get(`${API_PREFIX}/admin/slots/${slotId}/funding-status`)
+  return res.data.data
+}
+
+export async function startFunding(slotId: string): Promise<void> {
+  await apiClient.post(`${API_PREFIX}/admin/slots/${slotId}/funding/start`)
+}
+
+export async function stopFunding(slotId: string): Promise<void> {
+  await apiClient.post(`${API_PREFIX}/admin/slots/${slotId}/funding/stop`)
+}
+
+export async function confirmFunding(slotId: string): Promise<void> {
+  await apiClient.post(`${API_PREFIX}/admin/slots/${slotId}/funding/confirm`)
+}
+
+export async function failFunding(slotId: string): Promise<void> {
+  await apiClient.post(`${API_PREFIX}/admin/slots/${slotId}/funding/fail`)
 }
