@@ -14,7 +14,7 @@
   border-radius: 15px;
   padding: 11px 14px;
   box-shadow: var(--d-shadow-card);
-  min-width: 280px;
+  width: 320px;
   transition: border-color 0.15s;
   cursor: pointer;
   font-family: inherit;
