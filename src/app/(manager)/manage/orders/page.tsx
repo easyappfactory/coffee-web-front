@@ -199,49 +199,51 @@ export default function ManageOrdersPage() {
           {slot.phaseLabel}
         </span>
 
-        {/* PRE → 펀딩 바로 시작 */}
-        {slot.phase === "PRE" && (
-          <button
-            type="button"
-            className={`${styles.btn} ${styles.btnPrimary}`}
-            onClick={() => setStartAlertOpen(true)}
-          >
-            펀딩 바로 시작
-          </button>
-        )}
-
-        {/* FUNDING → 임의 마감 (isTerminatable일 때만) */}
-        {slot.phase === "FUNDING" && fundingStatus?.isTerminatable && (
-          <button
-            type="button"
-            className={`${styles.btn} ${styles.btnGhost}`}
-            onClick={() => setStopConfirmOpen(true)}
-          >
-            임의 마감
-          </button>
-        )}
-
-        {/* PENDING → 펀딩 확정 + 실패 처리 */}
-        {slot.phase === "PENDING" && (
-          <>
+        <div className={styles.slotbarActions}>
+          {/* PRE → 펀딩 바로 시작 */}
+          {slot.phase === "PRE" && (
             <button
               type="button"
               className={`${styles.btn} ${styles.btnPrimary}`}
-              disabled={phaseTransition.confirmFunding.isPending}
-              onClick={() => phaseTransition.confirmFunding.mutate()}
+              onClick={() => setStartAlertOpen(true)}
             >
-              {phaseTransition.confirmFunding.isPending ? "처리 중…" : "펀딩 확정"}
+              펀딩 바로 시작
             </button>
+          )}
+
+          {/* FUNDING → 임의 마감 (isTerminatable일 때만) */}
+          {slot.phase === "FUNDING" && fundingStatus?.isTerminatable && (
             <button
               type="button"
               className={`${styles.btn} ${styles.btnGhost}`}
-              disabled={phaseTransition.failFunding.isPending}
-              onClick={() => phaseTransition.failFunding.mutate()}
+              onClick={() => setStopConfirmOpen(true)}
             >
-              {phaseTransition.failFunding.isPending ? "처리 중…" : "실패 처리"}
+              임의 마감
             </button>
-          </>
-        )}
+          )}
+
+          {/* PENDING → 펀딩 확정 + 실패 처리 */}
+          {slot.phase === "PENDING" && (
+            <>
+              <button
+                type="button"
+                className={`${styles.btn} ${styles.btnPrimary}`}
+                disabled={phaseTransition.confirmFunding.isPending}
+                onClick={() => phaseTransition.confirmFunding.mutate()}
+              >
+                {phaseTransition.confirmFunding.isPending ? "처리 중…" : "펀딩 확정"}
+              </button>
+              <button
+                type="button"
+                className={`${styles.btn} ${styles.btnGhost}`}
+                disabled={phaseTransition.failFunding.isPending}
+                onClick={() => phaseTransition.failFunding.mutate()}
+              >
+                {phaseTransition.failFunding.isPending ? "처리 중…" : "실패 처리"}
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Stat strip — phase-aware (summary 로드 후) */}
