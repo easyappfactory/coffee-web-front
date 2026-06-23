@@ -33,6 +33,8 @@ The app is a coffee creator platform ("바리스타 마스터 / Barista Masters"
 **API layer** (`src/lib/api.ts`):
 All backend calls go through this file. `USE_MOCK = true` at the top swaps every endpoint to local mock data in `src/lib/mock/`. To connect a real backend, set `NEXT_PUBLIC_API_URL` in `.env.local` and flip the flag to `false` — no other changes needed.
 
+**API 경로 규칙 (필수):** 백엔드 컨트롤러 경로는 `/internal-api/v1/...`이지만, 프론트는 **절대 `/internal-api`로 직접 호출하지 않는다.** 모든 호출은 `apiClient`(baseURL=`NEXT_PUBLIC_API_URL`)에 **`API_PREFIX = process.env.NEXT_PUBLIC_API_PREFIX`(예: `/api/v1/bs`)를 경로 앞에 붙여** 보낸다 — 즉 `apiClient.get(\`${API_PREFIX}/admin/slots\`)` 형태. 게이트웨이가 FE prefix(`/api/v1/bs`)를 백엔드 `/internal-api/v1`로 매핑하므로, FE는 게이트웨이 경로만 신경 쓰면 된다. 새 API 함수도 반드시 `${API_PREFIX}`를 접두어로 사용할 것.
+
 API contracts (mocked endpoints mirror these exactly):
 
 | Method | Path | 설명 |

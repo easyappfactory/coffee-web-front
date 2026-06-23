@@ -1,16 +1,36 @@
 "use client"
 
+import { useEffect } from "react"
 import { Wallet, Package, SquareStack, ShoppingBag } from "lucide-react"
 import { StatCard } from "@/components/manage/common/StatCard"
-import { ManagerSlotGrid } from "@/components/manage/slot/ManagerSlotGrid"
-import {
-  mockManagerStats,
-  mockActiveSlots,
-  mockEndedSlots,
-} from "@/lib/mock/manager"
+import { AdminSlotGrid } from "@/components/manage/slot/AdminSlotGrid"
+import { mockManagerStats } from "@/lib/mock/manager"
+import { useAdminSlots } from "@/hooks/useAdminOrders"
+import { POC_USERS } from "@/lib/api"
 
 export default function ManageSlotsPage() {
   const stats = mockManagerStats
+  const slotsQuery = useAdminSlots()
+
+  useEffect(() => {
+    localStorage.setItem("pocUserId", POC_USERS.MANAGER)
+  }, [])
+
+  if (slotsQuery.isLoading) {
+    return (
+      <div className="flex items-center justify-center py-40 text-sm text-ink-muted">
+        슬롯 목록을 불러오는 중...
+      </div>
+    )
+  }
+
+  if (slotsQuery.isError) {
+    return (
+      <div className="flex items-center justify-center py-40 text-sm text-red-500">
+        슬롯 목록을 불러오기 실패했습니다.
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-10">
@@ -54,11 +74,8 @@ export default function ManageSlotsPage() {
         />
       </div>
 
-      {/* Slot Grid with Tabs */}
-      <ManagerSlotGrid
-        activeSlots={mockActiveSlots}
-        endedSlots={mockEndedSlots}
-      />
+      {/* Slot Grid with Phase Tabs */}
+      <AdminSlotGrid slots={slotsQuery.data ?? []} />
     </div>
   )
 }

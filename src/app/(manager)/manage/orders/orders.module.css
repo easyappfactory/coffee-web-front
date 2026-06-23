@@ -88,6 +88,14 @@
   margin-bottom: 22px;
 }
 
+/* Slot bar action buttons — pushed to the right end */
+.slotbarActions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 /* Phase badge */
 .phaseBadge {
   display: inline-flex;

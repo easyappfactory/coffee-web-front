@@ -15,6 +15,7 @@ export const MOCK_ADMIN_SLOTS: AdminSlot[] = [
     phase: "FUNDING",
     phaseLabel: "펀딩 중",
     deadline: "2026-07-10",
+    thumbnailUrl: null,
   },
   {
     slotId: "slot-operating-1",
@@ -23,6 +24,7 @@ export const MOCK_ADMIN_SLOTS: AdminSlot[] = [
     phase: "OPERATING",
     phaseLabel: "운영 중",
     deadline: "2026-07-31",
+    thumbnailUrl: null,
   },
   {
     slotId: "slot-operating-2",
@@ -31,6 +33,7 @@ export const MOCK_ADMIN_SLOTS: AdminSlot[] = [
     phase: "OPERATING",
     phaseLabel: "운영 중",
     deadline: "2026-08-15",
+    thumbnailUrl: null,
   },
   {
     slotId: "slot-pre-1",
@@ -39,6 +42,7 @@ export const MOCK_ADMIN_SLOTS: AdminSlot[] = [
     phase: "PRE",
     phaseLabel: "펀딩 전",
     deadline: "2026-08-01",
+    thumbnailUrl: null,
   },
   {
     slotId: "slot-closed-1",
@@ -47,6 +51,7 @@ export const MOCK_ADMIN_SLOTS: AdminSlot[] = [
     phase: "CLOSED",
     phaseLabel: "종료",
     deadline: "2026-05-20",
+    thumbnailUrl: null,
   },
 ]
 
