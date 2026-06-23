@@ -8,10 +8,15 @@ import {
   useAdminSlots,
   useAdminSlotSummary,
   useAdminSlotOrders,
+  useSlotFundingStatus,
+  useSlotPhaseTransition,
 } from "@/hooks/useAdminOrders"
 import { SlotSelect } from "@/components/manager/SlotSelect"
 import { SlotStatStrip } from "@/components/manager/SlotStatStrip"
 import { OrdersTable } from "@/components/manager/OrdersTable"
+import { StartFundingAlert } from "@/components/manager/StartFundingAlert"
+import { FundingPendingModal } from "@/components/manager/FundingPendingModal"
+import { Dialog } from "@/components/ui/dialog"
 import styles from "./orders.module.css"
 
 const PER_PAGE = 8
@@ -28,6 +33,7 @@ const ALL_TABS: { key: AdminOrderTab; label: string; alert?: boolean }[] = [
 const PHASE_TABS: Record<SlotPhase, AdminOrderTab[]> = {
   PRE: [],
   FUNDING: ["all", "funding", "cancel"],
+  PENDING: ["all", "funding", "cancel"],
   OPERATING: ["all", "pre", "post", "cancel", "exchange"],
   CLOSED: ["all", "post", "cancel", "exchange"],
   FAILED: ["all", "cancel"],
@@ -36,6 +42,7 @@ const PHASE_TABS: Record<SlotPhase, AdminOrderTab[]> = {
 const PHASE_BADGE_CLASS: Record<SlotPhase, string> = {
   PRE: styles.phPRE,
   FUNDING: styles.phFUNDING,
+  PENDING: styles.phPENDING,
   OPERATING: styles.phOPERATING,
   CLOSED: styles.phCLOSED,
   FAILED: styles.phFAILED,
@@ -97,6 +104,26 @@ export default function ManageOrdersPage() {
     page - 1,
   )
   const ordersPage = ordersQuery.data
+
+  // 펀딩 상태 (FUNDING/PENDING 시 isTerminatable 등 확인용)
+  const fundingStatusQuery = useSlotFundingStatus(slotId)
+  const fundingStatus = fundingStatusQuery.data
+
+  // 상태 전이 뮤테이션
+  const phaseTransition = useSlotPhaseTransition(slotId ?? "")
+
+  // 모달 open 상태
+  const [startAlertOpen, setStartAlertOpen] = useState(false)
+  const [stopConfirmOpen, setStopConfirmOpen] = useState(false)
+
+  // PENDING 축하 모달: 슬롯별 1회성 억제
+  const [pendingModalDismissed, setPendingModalDismissed] = useState<Set<string>>(new Set())
+  const pendingModalOpen =
+    !!slot && slot.phase === "PENDING" && !pendingModalDismissed.has(slot.slotId)
+
+  function handlePendingModalClose() {
+    if (slotId) setPendingModalDismissed((prev) => new Set(Array.from(prev).concat(slotId)))
+  }
 
   const visibleTabs = slot
     ? ALL_TABS.filter((t) => PHASE_TABS[slot.phase].includes(t.key))
@@ -163,7 +190,7 @@ export default function ManageOrdersPage() {
         </div>
       </div>
 
-      {/* Slot selector + phase badge */}
+      {/* Slot selector + phase badge + 상태 전이 버튼 */}
       <div className={styles.slotbar}>
         <SlotSelect slots={slots} value={slot.slotId} onChange={handleSlotChange} />
         <span
@@ -171,6 +198,50 @@ export default function ManageOrdersPage() {
         >
           {slot.phaseLabel}
         </span>
+
+        {/* PRE → 펀딩 바로 시작 */}
+        {slot.phase === "PRE" && (
+          <button
+            type="button"
+            className={`${styles.btn} ${styles.btnPrimary}`}
+            onClick={() => setStartAlertOpen(true)}
+          >
+            펀딩 바로 시작
+          </button>
+        )}
+
+        {/* FUNDING → 임의 마감 (isTerminatable일 때만) */}
+        {slot.phase === "FUNDING" && fundingStatus?.isTerminatable && (
+          <button
+            type="button"
+            className={`${styles.btn} ${styles.btnGhost}`}
+            onClick={() => setStopConfirmOpen(true)}
+          >
+            임의 마감
+          </button>
+        )}
+
+        {/* PENDING → 펀딩 확정 + 실패 처리 */}
+        {slot.phase === "PENDING" && (
+          <>
+            <button
+              type="button"
+              className={`${styles.btn} ${styles.btnPrimary}`}
+              disabled={phaseTransition.confirmFunding.isPending}
+              onClick={() => phaseTransition.confirmFunding.mutate()}
+            >
+              {phaseTransition.confirmFunding.isPending ? "처리 중…" : "펀딩 확정"}
+            </button>
+            <button
+              type="button"
+              className={`${styles.btn} ${styles.btnGhost}`}
+              disabled={phaseTransition.failFunding.isPending}
+              onClick={() => phaseTransition.failFunding.mutate()}
+            >
+              {phaseTransition.failFunding.isPending ? "처리 중…" : "실패 처리"}
+            </button>
+          </>
+        )}
       </div>
 
       {/* Stat strip — phase-aware (summary 로드 후) */}
@@ -245,6 +316,51 @@ export default function ManageOrdersPage() {
 
       {/* Toast container — 추후 액션 피드백용 */}
       <div className={styles.toastWrap} aria-live="polite" />
+
+      {/* ── 모달 ─────────────────────────────────────────────────────────────── */}
+
+      {/* PRE: 펀딩 시작 경고 모달 */}
+      <StartFundingAlert
+        open={startAlertOpen}
+        onClose={() => setStartAlertOpen(false)}
+        mutation={phaseTransition.startFunding}
+      />
+
+      {/* FUNDING: 임의 마감 확인 모달 */}
+      <Dialog open={stopConfirmOpen} onClose={() => setStopConfirmOpen(false)}>
+        <div className="px-6 py-8 flex flex-col items-center gap-6">
+          <p className="text-center text-base font-medium leading-relaxed text-foreground">
+            모집을 중단하고 확정 대기 단계로 넘어갑니다.
+          </p>
+          <div className="flex gap-3 w-full">
+            <button
+              type="button"
+              onClick={() => setStopConfirmOpen(false)}
+              className="flex-1 rounded-xl px-4 py-3 text-sm font-semibold text-muted-foreground bg-muted hover:bg-muted/80 transition-colors"
+            >
+              취소
+            </button>
+            <button
+              type="button"
+              disabled={phaseTransition.stopFunding.isPending}
+              onClick={() =>
+                phaseTransition.stopFunding.mutate(undefined, {
+                  onSuccess: () => setStopConfirmOpen(false),
+                })
+              }
+              className="flex-1 rounded-xl px-4 py-3 text-sm font-bold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {phaseTransition.stopFunding.isPending ? "처리 중…" : "확인"}
+            </button>
+          </div>
+        </div>
+      </Dialog>
+
+      {/* PENDING: 축하 모달 (1회성, 바깥 클릭으로 닫힘) */}
+      <FundingPendingModal
+        open={pendingModalOpen}
+        onClose={handlePendingModalClose}
+      />
     </>
   )
 }

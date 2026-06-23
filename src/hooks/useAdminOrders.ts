@@ -1,8 +1,13 @@
-import { useQuery, keepPreviousData } from "@tanstack/react-query"
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query"
 import {
   getAdminSlots,
   getAdminSlotSummary,
   getAdminSlotOrders,
+  getSlotFundingStatus,
+  startFunding as startFundingApi,
+  stopFunding as stopFundingApi,
+  confirmFunding as confirmFundingApi,
+  failFunding as failFundingApi,
 } from "@/lib/api"
 import type { AdminOrderTab } from "@/types/adminOrder"
 
@@ -29,3 +34,41 @@ export const useAdminSlotOrders = (
     enabled: !!slotId,
     placeholderData: keepPreviousData,
   })
+
+export const useSlotFundingStatus = (slotId?: string) =>
+  useQuery({
+    queryKey: ["admin", "slot", slotId, "funding-status"],
+    queryFn: () => getSlotFundingStatus(slotId!),
+    enabled: !!slotId,
+  })
+
+export const useSlotPhaseTransition = (slotId: string) => {
+  const qc = useQueryClient()
+
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ["admin", "slots"] })
+    qc.invalidateQueries({ queryKey: ["admin", "slot", slotId] })
+  }
+
+  const startFunding = useMutation({
+    mutationFn: () => startFundingApi(slotId),
+    onSuccess: invalidate,
+  })
+
+  const stopFunding = useMutation({
+    mutationFn: () => stopFundingApi(slotId),
+    onSuccess: invalidate,
+  })
+
+  const confirmFunding = useMutation({
+    mutationFn: () => confirmFundingApi(slotId),
+    onSuccess: invalidate,
+  })
+
+  const failFunding = useMutation({
+    mutationFn: () => failFundingApi(slotId),
+    onSuccess: invalidate,
+  })
+
+  return { startFunding, stopFunding, confirmFunding, failFunding }
+}

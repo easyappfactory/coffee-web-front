@@ -1,4 +1,4 @@
-export type SlotPhase = "PRE" | "FUNDING" | "FAILED" | "OPERATING" | "CLOSED"
+export type SlotPhase = "PRE" | "FUNDING" | "PENDING" | "FAILED" | "OPERATING" | "CLOSED"
 export type AdminOrderTab = "all" | "funding" | "pre" | "post" | "cancel" | "exchange"
 
 export interface AdminSlot {
@@ -52,6 +52,23 @@ export interface AdminOrderPage {
   size: number
   totalCount: number
   totalPages: number
+}
+
+// 슬롯 펀딩 상태 — GET /admin/slots/{slotId}/funding-status
+export interface SlotFundingStatus {
+  slotId: string
+  phase: SlotPhase
+  phaseLabel: string
+  currentAmount: number
+  minAmount: number
+  maxAmount: number | null
+  deadline: string
+  minReached: boolean
+  maxReached: boolean
+  deadlineReached: boolean
+  isTerminatable: boolean
+  canConfirm: boolean
+  canFail: boolean
 }
 
 // (다음 슬라이스에서 사용) 송장 일괄등록 미리보기

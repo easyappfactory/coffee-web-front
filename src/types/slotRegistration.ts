@@ -24,7 +24,10 @@ export interface SlotRegistrationFormData {
   thumbnailFile: FileList | null
   flavor: SlotFlavorInput
   pricingOptions: PricingOption[]
-  deadline: string
+  fundingStartDate: string
+  fundingEndDate: string
+  minFundingAmount: number
+  maxFundingAmount: number | null
 }
 
 export interface CreateSlotRequest {
@@ -33,7 +36,10 @@ export interface CreateSlotRequest {
   hashtags: string[]
   flavor: SlotFlavorInput
   pricingOptions: Omit<PricingOption, "id">[]
-  deadline: string
+  fundingStartDate: string
+  deadline: string // = fundingEndDate
+  minFundingAmount: number
+  maxFundingAmount: number | null
 }
 
 export interface CreateSlotResponse {
