@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
@@ -11,6 +12,8 @@ import {
   Settings,
   Plus,
   HelpCircle,
+  Menu,
+  X,
 } from "lucide-react"
 import { SidebarNavItem } from "./SidebarNavItem"
 
@@ -22,16 +25,39 @@ const NAV_ITEMS = [
   { href: "/manage/settings", icon: Settings, label: "스토어 운영 설정" },
 ]
 
+/** Breakpoint (px) below which sidebar collapses into hamburger */
+const COLLAPSE_BP = 1024
+
 export function ManagerSidebar() {
   const pathname = usePathname()
+  const [open, setOpen] = useState(false)
+  const [collapsed, setCollapsed] = useState(false)
+
+  // Detect viewport width
+  const handleResize = useCallback(() => {
+    const narrow = window.innerWidth < COLLAPSE_BP
+    setCollapsed(narrow)
+    if (!narrow) setOpen(false) // reset drawer when going wide
+  }, [])
+
+  useEffect(() => {
+    handleResize()
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
+  }, [handleResize])
+
+  // Close drawer on route change
+  useEffect(() => {
+    setOpen(false)
+  }, [pathname])
 
   function isActive(href: string) {
     if (href === "/manage") return pathname === "/manage"
     return pathname.startsWith(href)
   }
 
-  return (
-    <aside className="fixed left-0 top-0 z-40 flex h-screen w-72 flex-col border-r border-border bg-white">
+  const sidebarContent = (
+    <>
       {/* Logo */}
       <div className="flex items-center gap-2 px-6 py-8">
         <Coffee className="h-5 w-5 text-brand" />
@@ -71,6 +97,56 @@ export function ManagerSidebar() {
           Help Center
         </Link>
       </div>
-    </aside>
+    </>
+  )
+
+  // Wide viewport — static sidebar
+  if (!collapsed) {
+    return (
+      <aside className="fixed left-0 top-0 z-40 flex h-screen w-[30%] max-w-[320px] min-w-[240px] flex-col border-r border-border bg-white">
+        {sidebarContent}
+      </aside>
+    )
+  }
+
+  // Narrow viewport — hamburger + drawer
+  return (
+    <>
+      {/* Hamburger button */}
+      <button
+        type="button"
+        aria-label="메뉴 열기"
+        onClick={() => setOpen(true)}
+        className="fixed left-4 top-4 z-50 flex h-10 w-10 items-center justify-center rounded-inner bg-white border border-border shadow-sm transition-colors hover:bg-gray-light"
+      >
+        <Menu className="h-5 w-5 text-ink-1" />
+      </button>
+
+      {/* Overlay */}
+      {open && (
+        <div
+          className="fixed inset-0 z-40 bg-black/30 transition-opacity"
+          onClick={() => setOpen(false)}
+        />
+      )}
+
+      {/* Drawer */}
+      <aside
+        className={`fixed left-0 top-0 z-50 flex h-screen w-72 flex-col border-r border-border bg-white transition-transform duration-200 ${
+          open ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        {/* Close button */}
+        <button
+          type="button"
+          aria-label="메뉴 닫기"
+          onClick={() => setOpen(false)}
+          className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full text-ink-muted hover:bg-gray-light hover:text-ink-1 transition-colors"
+        >
+          <X className="h-4 w-4" />
+        </button>
+        {sidebarContent}
+      </aside>
+    </>
   )
 }

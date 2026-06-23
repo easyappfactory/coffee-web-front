@@ -22,15 +22,6 @@ const PHASE_LABELS: Record<SlotPhase, string> = {
   FAILED: "펀딩 실패",
 }
 
-const PHASE_CLASS: Record<SlotPhase, string> = {
-  PRE: styles.phPRE,
-  FUNDING: styles.phFUNDING,
-  PENDING: styles.phPENDING,
-  OPERATING: styles.phOPERATING,
-  CLOSED: styles.phCLOSED,
-  FAILED: styles.phFAILED,
-}
-
 export function SlotSelect({ slots, value, onChange }: SlotSelectProps) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -63,11 +54,6 @@ export function SlotSelect({ slots, value, onChange }: SlotSelectProps) {
         <div className={styles.tx}>
           <div className={styles.nm}>{cur?.name ?? "슬롯 선택"}</div>
         </div>
-        {cur && (
-          <span className={`${styles.phaseBadge} ${PHASE_CLASS[cur.phase]}`}>
-            {cur.phaseLabel}
-          </span>
-        )}
         <ChevronDown
           size={18}
           className={`${styles.chev}${open ? ` ${styles.chevOpen}` : ""}`}
@@ -93,9 +79,6 @@ export function SlotSelect({ slots, value, onChange }: SlotSelectProps) {
                   }}
                 >
                   <span className={styles.optNm}>{s.name}</span>
-                  <span className={`${styles.phaseBadge} ${PHASE_CLASS[s.phase]}`}>
-                    {s.phaseLabel}
-                  </span>
                 </button>
               ))}
             </div>
