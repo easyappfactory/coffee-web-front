@@ -8,6 +8,7 @@ export interface AdminSlot {
   phase: SlotPhase
   phaseLabel: string
   deadline: string
+  thumbnailUrl: string | null
 }
 
 export interface AdminOrder {
