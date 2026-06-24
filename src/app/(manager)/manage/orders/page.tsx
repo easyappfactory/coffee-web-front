@@ -2,7 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { Download, Upload, Search, Clock } from "lucide-react"
-import type { AdminOrderTab, SlotPhase, AdminSlotSummary } from "@/types/adminOrder"
+import type {
+  AdminOrderTab,
+  SlotPhase,
+  AdminSlotSummary,
+} from "@/types/adminOrder"
 import { POC_USERS } from "@/lib/api"
 import {
   useAdminSlots,
@@ -16,7 +20,7 @@ import { SlotStatStrip } from "@/components/manager/SlotStatStrip"
 import { OrdersTable } from "@/components/manager/OrdersTable"
 import { StartFundingAlert } from "@/components/manager/StartFundingAlert"
 import { FundingPendingModal } from "@/components/manager/FundingPendingModal"
-import { Dialog } from "@/components/ui/dialog"
+import { ConfirmDialog } from "@/components/common/ConfirmDialog"
 import styles from "./orders.module.css"
 
 const PER_PAGE = 8
@@ -101,7 +105,7 @@ export default function ManageOrdersPage() {
     slotId,
     tab,
     query.trim() || undefined,
-    page - 1,
+    page - 1
   )
   const ordersPage = ordersQuery.data
 
@@ -117,12 +121,19 @@ export default function ManageOrdersPage() {
   const [stopConfirmOpen, setStopConfirmOpen] = useState(false)
 
   // PENDING 축하 모달: 슬롯별 1회성 억제
-  const [pendingModalDismissed, setPendingModalDismissed] = useState<Set<string>>(new Set())
+  const [pendingModalDismissed, setPendingModalDismissed] = useState<
+    Set<string>
+  >(new Set())
   const pendingModalOpen =
-    !!slot && slot.phase === "PENDING" && !pendingModalDismissed.has(slot.slotId)
+    !!slot &&
+    slot.phase === "PENDING" &&
+    !pendingModalDismissed.has(slot.slotId)
 
   function handlePendingModalClose() {
-    if (slotId) setPendingModalDismissed((prev) => new Set(Array.from(prev).concat(slotId)))
+    if (slotId)
+      setPendingModalDismissed(
+        (prev) => new Set(Array.from(prev).concat(slotId))
+      )
   }
 
   const visibleTabs = slot
@@ -147,9 +158,7 @@ export default function ManageOrdersPage() {
     return <div className={styles.loading}>슬롯을 불러오는 중…</div>
   }
   if (slotsQuery.isError) {
-    return (
-      <div className={styles.loading}>슬롯을 불러오지 못했습니다.</div>
-    )
+    return <div className={styles.loading}>슬롯을 불러오지 못했습니다.</div>
   }
   if (!slot) {
     return <div className={styles.loading}>표시할 슬롯이 없습니다.</div>
@@ -192,7 +201,11 @@ export default function ManageOrdersPage() {
 
       {/* Slot selector + phase badge + 상태 전이 버튼 */}
       <div className={styles.slotbar}>
-        <SlotSelect slots={slots} value={slot.slotId} onChange={handleSlotChange} />
+        <SlotSelect
+          slots={slots}
+          value={slot.slotId}
+          onChange={handleSlotChange}
+        />
         <span
           className={`${styles.phaseBadge} ${PHASE_BADGE_CLASS[slot.phase]}`}
         >
@@ -231,7 +244,9 @@ export default function ManageOrdersPage() {
                 disabled={phaseTransition.confirmFunding.isPending}
                 onClick={() => phaseTransition.confirmFunding.mutate()}
               >
-                {phaseTransition.confirmFunding.isPending ? "처리 중…" : "펀딩 확정"}
+                {phaseTransition.confirmFunding.isPending
+                  ? "처리 중…"
+                  : "펀딩 확정"}
               </button>
               <button
                 type="button"
@@ -239,7 +254,9 @@ export default function ManageOrdersPage() {
                 disabled={phaseTransition.failFunding.isPending}
                 onClick={() => phaseTransition.failFunding.mutate()}
               >
-                {phaseTransition.failFunding.isPending ? "처리 중…" : "실패 처리"}
+                {phaseTransition.failFunding.isPending
+                  ? "처리 중…"
+                  : "실패 처리"}
               </button>
             </>
           )}
@@ -257,7 +274,9 @@ export default function ManageOrdersPage() {
               <Clock size={26} />
             </div>
             <h4>아직 펀딩이 시작되지 않았습니다</h4>
-            <p>{slot.deadline} 펀딩이 오픈되면 주문 내역이 이곳에 표시됩니다.</p>
+            <p>
+              {slot.deadline} 펀딩이 오픈되면 주문 내역이 이곳에 표시됩니다.
+            </p>
           </div>
         </div>
       ) : (
@@ -329,34 +348,25 @@ export default function ManageOrdersPage() {
       />
 
       {/* FUNDING: 임의 마감 확인 모달 */}
-      <Dialog open={stopConfirmOpen} onClose={() => setStopConfirmOpen(false)}>
-        <div className="px-6 py-8 flex flex-col items-center gap-6">
-          <p className="text-center text-base font-medium leading-relaxed text-foreground">
-            모집을 중단하고 확정 대기 단계로 넘어갑니다.
-          </p>
-          <div className="flex gap-3 w-full">
-            <button
-              type="button"
-              onClick={() => setStopConfirmOpen(false)}
-              className="flex-1 rounded-xl px-4 py-3 text-sm font-semibold text-muted-foreground bg-muted hover:bg-muted/80 transition-colors"
-            >
-              취소
-            </button>
-            <button
-              type="button"
-              disabled={phaseTransition.stopFunding.isPending}
-              onClick={() =>
-                phaseTransition.stopFunding.mutate(undefined, {
-                  onSuccess: () => setStopConfirmOpen(false),
-                })
-              }
-              className="flex-1 rounded-xl px-4 py-3 text-sm font-bold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {phaseTransition.stopFunding.isPending ? "처리 중…" : "확인"}
-            </button>
-          </div>
-        </div>
-      </Dialog>
+      <ConfirmDialog
+        open={stopConfirmOpen}
+        message={
+          <>
+            모집을 중단하고 <b>확정 대기</b> 단계로 넘어갑니다.
+          </>
+        }
+        desc="마감하면 더 이상 새로운 주문을 받지 않으며, 목표 달성 여부에 따라 확정 또는 실패로 처리됩니다."
+        cancelLabel="취소"
+        confirmLabel="임의 마감"
+        pending={phaseTransition.stopFunding.isPending}
+        pendingLabel="처리 중…"
+        onCancel={() => setStopConfirmOpen(false)}
+        onConfirm={() =>
+          phaseTransition.stopFunding.mutate(undefined, {
+            onSuccess: () => setStopConfirmOpen(false),
+          })
+        }
+      />
 
       {/* PENDING: 축하 모달 (1회성, 바깥 클릭으로 닫힘) */}
       <FundingPendingModal

@@ -1,0 +1,40 @@
+/* 펀딩 성공 축하 — 디자인 시스템 done-wrap (globals.css --d-* 토큰) */
+.doneWrap {
+  text-align: center;
+  padding: 30px 10px;
+}
+.doneIc {
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  background: var(--d-green-bg);
+  color: var(--d-green);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+  animation: donePop 0.35s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+@keyframes donePop {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+.doneWrap h3 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--d-ink);
+}
+.doneWrap p {
+  margin: 0;
+  color: var(--d-ink-2);
+  font-size: 14px;
+  line-height: 1.55;
+}

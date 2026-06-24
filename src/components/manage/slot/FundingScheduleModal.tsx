@@ -2,14 +2,23 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { format, addDays, addMonths, startOfDay } from "date-fns"
-import { Dialog } from "@/components/ui/dialog"
+import { Modal } from "@/components/common/Modal"
+import modalStyles from "@/components/common/Modal.module.css"
 import { Calendar } from "@/components/ui/calendar"
-import { endDateFor, describeFundingDuration, type PeriodKey } from "@/lib/fundingDuration"
+import {
+  endDateFor,
+  describeFundingDuration,
+  type PeriodKey,
+} from "@/lib/fundingDuration"
+import styles from "./FundingScheduleModal.module.css"
 
 interface FundingScheduleModalProps {
   open: boolean
   onClose: () => void
-  onConfirm: (dates: { fundingStartDate: string; fundingEndDate: string }) => void
+  onConfirm: (dates: {
+    fundingStartDate: string
+    fundingEndDate: string
+  }) => void
   submitting?: boolean
 }
 
@@ -32,7 +41,9 @@ export function FundingScheduleModal({
   // Step 1 state
   const [step, setStep] = useState<1 | 2>(1)
   const [showDatePicker, setShowDatePicker] = useState(false)
-  const [selectedCustomStart, setSelectedCustomStart] = useState<Date | undefined>(undefined)
+  const [selectedCustomStart, setSelectedCustomStart] = useState<
+    Date | undefined
+  >(undefined)
 
   // Step 2 state
   const [startDate, setStartDate] = useState<Date | null>(null)
@@ -98,121 +109,162 @@ export function FundingScheduleModal({
 
   const maxStartDate = addMonths(today, 12)
 
+  // step indicator
+  const stepIndicator = (
+    <div className={styles.steps}>
+      <div
+        className={`${styles.step} ${step === 1 ? styles.on : styles.doneStep}`}
+      >
+        <span className={styles.num}>{step === 1 ? "1" : "✓"}</span>
+        시작일
+      </div>
+      <div className={styles.stepLine} />
+      <div className={`${styles.step} ${step === 2 ? styles.on : ""}`}>
+        <span className={styles.num}>2</span>
+        펀딩 기간
+      </div>
+    </div>
+  )
+
+  // step-aware footer
+  const footer =
+    step === 1 ? (
+      <span className={modalStyles.note}>
+        시작일을 선택하면 펀딩 기간 단계로 이동합니다.
+      </span>
+    ) : (
+      <>
+        <button
+          type="button"
+          className={`${modalStyles.btn} ${modalStyles.btnGhost}`}
+          onClick={() => setStep(1)}
+          disabled={submitting}
+        >
+          이전
+        </button>
+        <button
+          type="button"
+          className={`${modalStyles.btn} ${modalStyles.btnPrimary}`}
+          onClick={handleConfirm}
+          disabled={submitting || !startDate || !endDate}
+        >
+          {submitting ? "생성 중…" : "생성하기"}
+        </button>
+      </>
+    )
+
   return (
-    <Dialog open={open} onClose={onClose} title="펀딩 일정">
-      <div className="px-5 py-6">
-        {/* ── 1단계: 시작일 선택 ─────────────────────────────────────────────── */}
-        {step === 1 && (
-          <div className="flex flex-col gap-3">
-            {/* 바로 펀딩 시작 */}
-            <div>
-              <button
-                type="button"
-                onClick={handleImmediateStart}
-                className="w-full rounded-xl border border-border bg-white px-5 py-3 text-sm font-semibold text-ink-1 transition-colors hover:border-primary hover:text-primary active:scale-[0.98]"
-              >
-                바로 펀딩 시작
-              </button>
-              <p className="mt-1 text-center text-xs text-muted-foreground">오늘부터</p>
-            </div>
+    <Modal
+      open={open}
+      title="펀딩 일정"
+      desc="펀딩 시작일과 기간을 설정합니다."
+      onClose={onClose}
+      footer={footer}
+    >
+      {stepIndicator}
 
-            {/* 지정일에 시작 */}
-            <div>
-              <button
-                type="button"
-                onClick={handleCustomStartClick}
-                className="w-full rounded-xl border border-border bg-white px-5 py-3 text-sm font-semibold text-ink-1 transition-colors hover:border-primary hover:text-primary active:scale-[0.98]"
-              >
-                지정일에 시작
-              </button>
-              {selectedCustomStart ? (
-                <p className="mt-1 text-center text-xs text-primary">
-                  {format(selectedCustomStart, "yyyy년 M월 d일")}
-                </p>
-              ) : (
-                <p className="mt-1 text-center text-xs text-muted-foreground opacity-0">-</p>
-              )}
-            </div>
-
-            {/* 날짜 선택 캘린더 */}
-            {showDatePicker && (
-              <div className="mt-2 flex justify-center">
-                <Calendar
-                  mode="single"
-                  selected={selectedCustomStart}
-                  onSelect={(day) => setSelectedCustomStart(day)}
-                  disabled={[{ before: today }, { after: maxStartDate }]}
-                  startMonth={today}
-                  endMonth={maxStartDate}
-                />
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* ── 2단계: 기간/종료일 선택 ────────────────────────────────────────── */}
-        {step === 2 && startDate && (
-          <div className="flex flex-col gap-5">
-            <h3 className="text-center text-sm font-semibold text-ink-1">펀딩 기간</h3>
-
-            {/* 기간 칩 */}
-            <div className="flex flex-wrap justify-center gap-2">
-              {PERIOD_OPTIONS.map(({ key, label }) => (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => handlePeriodChip(key)}
-                  className={[
-                    "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
-                    selectedPeriod === key
-                      ? "bg-primary text-primary-foreground"
-                      : "border border-border bg-white text-ink-1 hover:border-primary hover:text-primary",
-                  ].join(" ")}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-
-            {/* 종료일 캘린더 */}
-            <div className="flex justify-center">
-              <Calendar
-                mode="single"
-                selected={endDate ?? undefined}
-                onSelect={handleEndDateSelect}
-                disabled={[{ before: addDays(startDate, 1) }, { after: addMonths(startDate, 12) }]}
-                startMonth={startDate}
-                endMonth={addMonths(startDate, 12)}
-              />
-            </div>
-
-            {/* 구분선 + 요약 */}
-            {startDate && endDate && (
-              <>
-                <hr className="border-border" />
-                <div className="text-center">
-                  <p className="text-sm font-semibold text-ink-1">
-                    {format(startDate, "yyyy.MM.dd")} ~ {format(endDate, "yyyy.MM.dd")}
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {describeFundingDuration(startDate, endDate)}
-                  </p>
-                </div>
-              </>
-            )}
-
-            {/* 생성하기 버튼 */}
+      {/* ── 1단계: 시작일 선택 ─────────────────────────────────────────────── */}
+      {step === 1 && (
+        <div className={styles.choices}>
+          {/* 바로 펀딩 시작 */}
+          <div>
             <button
               type="button"
-              onClick={handleConfirm}
-              disabled={submitting || !startDate || !endDate}
-              className="w-full rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+              onClick={handleImmediateStart}
+              className={styles.choice}
             >
-              {submitting ? "생성 중..." : "생성하기"}
+              바로 펀딩 시작
             </button>
+            <p className={styles.choiceHint}>오늘부터</p>
           </div>
-        )}
-      </div>
-    </Dialog>
+
+          {/* 지정일에 시작 */}
+          <div>
+            <button
+              type="button"
+              onClick={handleCustomStartClick}
+              className={styles.choice}
+            >
+              지정일에 시작
+            </button>
+            {selectedCustomStart ? (
+              <p className={`${styles.choiceHint} ${styles.accent}`}>
+                {format(selectedCustomStart, "yyyy년 M월 d일")}
+              </p>
+            ) : (
+              <p className={`${styles.choiceHint} ${styles.spacer}`}>-</p>
+            )}
+          </div>
+
+          {/* 날짜 선택 캘린더 */}
+          {showDatePicker && (
+            <div className={styles.calWrap}>
+              <Calendar
+                mode="single"
+                selected={selectedCustomStart}
+                onSelect={(day) => setSelectedCustomStart(day)}
+                disabled={[{ before: today }, { after: maxStartDate }]}
+                startMonth={today}
+                endMonth={maxStartDate}
+              />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── 2단계: 기간/종료일 선택 ────────────────────────────────────────── */}
+      {step === 2 && startDate && (
+        <div className={styles.stack}>
+          <h4 className={styles.sectionTitle}>펀딩 기간</h4>
+
+          {/* 기간 칩 */}
+          <div className={styles.chips}>
+            {PERIOD_OPTIONS.map(({ key, label }) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => handlePeriodChip(key)}
+                className={`${styles.chip} ${
+                  selectedPeriod === key ? styles.chipActive : ""
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {/* 종료일 캘린더 */}
+          <div className={styles.calWrap}>
+            <Calendar
+              mode="single"
+              selected={endDate ?? undefined}
+              onSelect={handleEndDateSelect}
+              disabled={[
+                { before: addDays(startDate, 1) },
+                { after: addMonths(startDate, 12) },
+              ]}
+              startMonth={startDate}
+              endMonth={addMonths(startDate, 12)}
+            />
+          </div>
+
+          {/* 구분선 + 요약 */}
+          {startDate && endDate && (
+            <>
+              <hr className={styles.divider} />
+              <div className={styles.summary}>
+                <p className={styles.summaryRange}>
+                  {format(startDate, "yyyy.MM.dd")} ~{" "}
+                  {format(endDate, "yyyy.MM.dd")}
+                </p>
+                <p className={styles.summaryDur}>
+                  {describeFundingDuration(startDate, endDate)}
+                </p>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+    </Modal>
   )
 }

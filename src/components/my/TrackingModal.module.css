@@ -1,0 +1,194 @@
+/* ============================================================
+   배송 조회 — 디자인 시스템 track-card + timeline
+   globals.css 의 --d-* 토큰에 의존.
+   ============================================================ */
+
+.trackCard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border: 1px solid var(--d-line-2);
+  border-radius: 15px;
+  background: var(--d-surface-2);
+  margin-bottom: 8px;
+}
+.icoTile {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: var(--d-brown-soft);
+  color: var(--d-brown);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.tcMeta {
+  flex: 1;
+  min-width: 0;
+}
+.tcCourier {
+  font-size: 12.5px;
+  color: var(--d-ink-3);
+  font-weight: 600;
+}
+.tcNo {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--d-ink);
+}
+.copyBtn {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--d-ink-3);
+  background: var(--d-surface);
+  border: 1px solid var(--d-line-2);
+  transition: all 0.12s;
+  flex-shrink: 0;
+}
+.copyBtn:hover {
+  color: var(--d-brown);
+  border-color: var(--d-line-strong);
+}
+.copyBtn.copied {
+  color: var(--d-green);
+  border-color: var(--d-green);
+}
+
+.statusRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 2px 4px;
+}
+.statusRow .lab {
+  font-size: 13px;
+  color: var(--d-ink-3);
+  font-weight: 600;
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--d-teal);
+  background: var(--d-teal-bg);
+}
+.badge .bdot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.85;
+}
+
+/* timeline */
+.timeline {
+  margin: 18px 0 4px;
+  padding: 4px 2px;
+}
+.tlItem {
+  display: flex;
+  gap: 14px;
+  position: relative;
+  padding-bottom: 22px;
+}
+.tlItem:last-child {
+  padding-bottom: 0;
+}
+.tlRail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+.tlNode {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2.5px solid var(--d-line-strong);
+  background: var(--d-surface);
+  z-index: 1;
+  transition: all 0.2s;
+}
+.tlItem.done .tlNode {
+  border-color: var(--d-green);
+  background: var(--d-green);
+}
+.tlItem.current .tlNode {
+  border-color: var(--d-teal);
+  background: var(--d-teal);
+  box-shadow: 0 0 0 4px var(--d-teal-bg);
+}
+.tlLine {
+  width: 2.5px;
+  flex: 1;
+  background: var(--d-line-2);
+  margin: 2px 0;
+  min-height: 14px;
+}
+.tlItem.done .tlLine {
+  background: var(--d-green);
+}
+.tlBody {
+  flex: 1;
+  padding-bottom: 2px;
+}
+.tlTop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+.tlLabel {
+  font-size: 14.5px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--d-ink-3);
+}
+.tlItem.done .tlLabel {
+  color: var(--d-ink);
+}
+.tlItem.current .tlLabel {
+  color: var(--d-teal);
+}
+.tlTime {
+  font-size: 12px;
+  color: var(--d-ink-4);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.tlDesc {
+  font-size: 12.5px;
+  color: var(--d-ink-3);
+  margin-top: 3px;
+  line-height: 1.45;
+}
+
+/* states */
+.stateBox {
+  padding: 32px 10px;
+  text-align: center;
+  color: var(--d-ink-3);
+  font-size: 13.5px;
+}
+.skel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
