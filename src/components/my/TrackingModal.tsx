@@ -1,8 +1,12 @@
 "use client"
 
-import { Dialog } from "@/components/ui/dialog"
+import { useState } from "react"
+import { Truck, Copy, Check } from "lucide-react"
+import { Modal } from "@/components/common/Modal"
+import modalStyles from "@/components/common/Modal.module.css"
 import { useOrderTracking } from "@/hooks/useOrders"
 import { Skeleton } from "@/components/ui/skeleton"
+import styles from "./TrackingModal.module.css"
 
 interface TrackingModalProps {
   open: boolean
@@ -13,65 +17,123 @@ interface TrackingModalProps {
 
 export function TrackingModal({ open, onClose, orderId }: TrackingModalProps) {
   const { data: tracking, isLoading, isError } = useOrderTracking(orderId, open)
+  const [copied, setCopied] = useState(false)
+
+  function copyNo() {
+    if (!tracking?.trackingNumber) return
+    navigator.clipboard?.writeText(tracking.trackingNumber)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
+  }
 
   return (
-    <Dialog open={open} onClose={onClose} title="배송추적">
-      <div className="p-5">
-        {isLoading ? (
-          <div className="space-y-3">
-            <Skeleton className="h-6 w-48" />
-            <Skeleton className="h-4 w-32" />
-            <div className="mt-4 space-y-4">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={i} className="h-12 w-full" />
-              ))}
+    <Modal
+      open={open}
+      size="sm"
+      title="배송 조회"
+      desc="실시간 배송 현황입니다."
+      onClose={onClose}
+      footer={
+        <>
+          <span className={modalStyles.note}>
+            배송 정보는 택배사 시스템과 연동되어 자동 갱신됩니다.
+          </span>
+          <button
+            type="button"
+            className={`${modalStyles.btn} ${modalStyles.btnPrimary}`}
+            onClick={onClose}
+          >
+            확인
+          </button>
+        </>
+      }
+    >
+      {isLoading ? (
+        <div className={styles.skel}>
+          <Skeleton className="h-[78px] w-full rounded-[15px]" />
+          <Skeleton className="h-5 w-40" />
+          <div className={styles.skel}>
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-12 w-full" />
+            ))}
+          </div>
+        </div>
+      ) : isError ? (
+        <div className={styles.stateBox}>배송 정보를 불러올 수 없습니다.</div>
+      ) : tracking ? (
+        <>
+          {/* 택배사 / 송장번호 카드 */}
+          <div className={styles.trackCard}>
+            <div className={styles.icoTile}>
+              <Truck size={22} />
             </div>
-          </div>
-        ) : isError ? (
-          <div className="py-8 text-center text-[var(--ink-muted)]">
-            <p>배송 정보를 불러올 수 없습니다</p>
-          </div>
-        ) : tracking ? (
-          <>
-            <div className="mb-4">
-              <div className="flex items-center gap-2 text-sm text-[var(--ink-muted)]">
-                <span>{tracking.carrierName}</span>
-                <span>·</span>
-                <span>{tracking.trackingNumber}</span>
+            <div className={styles.tcMeta}>
+              <div className={styles.tcCourier}>{tracking.carrierName}</div>
+              <div className={styles.tcNo}>
+                {tracking.trackingNumber}
+                <button
+                  type="button"
+                  className={`${styles.copyBtn} ${copied ? styles.copied : ""}`}
+                  onClick={copyNo}
+                  title="송장번호 복사"
+                  aria-label="송장번호 복사"
+                >
+                  {copied ? <Check size={15} /> : <Copy size={15} />}
+                </button>
               </div>
-              <p className="mt-1 text-lg font-semibold text-[var(--ink-1)]">{tracking.status}</p>
             </div>
-            {tracking.tracks.length > 0 ? (
-              <div className="border-t pt-4">
-                <div className="space-y-0">
-                  {tracking.tracks.map((track, index) => (
-                    <div key={index} className="flex gap-3">
-                      <div className="flex flex-col items-center">
-                        {index === 0 ? (
-                          <div className="relative mt-1 flex h-3.5 w-3.5 items-center justify-center">
-                            <div className="absolute h-3.5 w-3.5 animate-ping rounded-full bg-green-400 opacity-30" />
-                            <div className="h-2.5 w-2.5 rounded-full bg-green-500" />
-                          </div>
-                        ) : (
-                          <div className="mt-1.5 h-2.5 w-2.5 rounded-full bg-gray-300" />
-                        )}
-                        {index < tracking.tracks.length - 1 && <div className="w-px flex-1 bg-gray-200" />}
-                      </div>
-                      <div className="pb-4">
-                        <p className="text-xs text-[var(--ink-muted)]">{track.time}</p>
-                        <p className="text-sm font-medium text-[var(--ink-1)]">{track.description}</p>
-                        {track.location && <p className="text-xs text-[var(--ink-muted)]">{track.location}</p>}
-                      </div>
+          </div>
+
+          {/* 현재 배송상태 */}
+          <div className={styles.statusRow}>
+            <span className={styles.lab}>현재 배송상태</span>
+            <span className={styles.badge}>
+              <span className={styles.bdot} />
+              {tracking.status}
+            </span>
+          </div>
+
+          {/* 타임라인 */}
+          {tracking.tracks.length > 0 ? (
+            <div className={styles.timeline}>
+              {tracking.tracks.map((track, index) => {
+                if (!track) return null
+                const isCurrent = index === 0
+                const cls = [
+                  styles.tlItem,
+                  isCurrent ? styles.current : styles.done,
+                ].join(" ")
+                return (
+                  <div key={index} className={cls}>
+                    <div className={styles.tlRail}>
+                      <div className={styles.tlNode} />
+                      {index < tracking.tracks.length - 1 && (
+                        <div className={styles.tlLine} />
+                      )}
                     </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <p className="py-4 text-center text-sm text-[var(--ink-muted)]">배송 추적 정보가 아직 없습니다</p>
-            )}
-          </>
-        ) : null}
-      </div>
-    </Dialog>
+                    <div className={styles.tlBody}>
+                      <div className={styles.tlTop}>
+                        <span className={styles.tlLabel}>
+                          {track.description}
+                          {isCurrent && " · 최신"}
+                        </span>
+                        <span className={styles.tlTime}>{track.time}</span>
+                      </div>
+                      {track.location && (
+                        <div className={styles.tlDesc}>{track.location}</div>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <div className={styles.stateBox}>
+              배송 추적 정보가 아직 없습니다.
+            </div>
+          )}
+        </>
+      ) : null}
+    </Modal>
   )
 }

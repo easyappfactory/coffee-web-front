@@ -1,0 +1,158 @@
+/* ============================================================
+   Barista Masters — Modal
+   디자인 시스템(원두 슬롯 주문관리)의 다이얼로그 셸.
+   오버레이 + 떠오르는 카드(헤더/본문/푸터). globals.css 의 --d-* 토큰에 의존.
+   ============================================================ */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(40, 30, 22, 0.42);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  animation: modalFade 0.16s ease-out;
+}
+@keyframes modalFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal {
+  background: var(--d-surface);
+  border-radius: 20px;
+  box-shadow: var(--d-shadow-pop);
+  width: 100%;
+  max-width: 720px;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modalRise 0.2s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+@keyframes modalRise {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.sizeSm {
+  max-width: 480px;
+}
+
+/* header */
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px 26px 18px;
+  border-bottom: 1px solid var(--d-line);
+}
+.title {
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: var(--d-ink);
+}
+.desc {
+  font-size: 13.5px;
+  color: var(--d-ink-3);
+  margin: 6px 0 0;
+  line-height: 1.5;
+}
+.desc b {
+  color: var(--d-ink);
+  font-weight: 700;
+}
+.xBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  color: var(--d-ink-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s;
+  flex-shrink: 0;
+}
+.xBtn:hover {
+  background: var(--d-surface-2);
+  color: var(--d-ink);
+}
+
+/* body */
+.body {
+  padding: 22px 26px;
+  overflow: auto;
+}
+
+/* footer */
+.foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 16px 26px;
+  border-top: 1px solid var(--d-line);
+  background: var(--d-surface-2);
+}
+.note {
+  font-size: 12.5px;
+  color: var(--d-ink-3);
+}
+
+/* shared buttons (디자인 시스템 .btn) */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 11px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  padding: 11px 16px;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    box-shadow 0.15s,
+    transform 0.05s;
+  white-space: nowrap;
+}
+.btn:active {
+  transform: translateY(0.5px);
+}
+.btnPrimary {
+  background: var(--d-brown);
+  color: #f5efe9;
+}
+.btnPrimary:hover {
+  background: var(--d-brown-2);
+}
+.btnGhost {
+  background: var(--d-surface);
+  color: var(--d-ink);
+  border: 1px solid var(--d-line-2);
+  box-shadow: var(--d-shadow-soft);
+}
+.btnGhost:hover {
+  background: var(--d-surface-2);
+  border-color: var(--d-line-strong);
+}
+.btnPrimary:disabled,
+.btnGhost:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
