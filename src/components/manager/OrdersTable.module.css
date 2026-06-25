@@ -279,3 +279,30 @@
   opacity: 0.35;
   cursor: not-allowed;
 }
+
+.shipForm {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 150px;
+}
+.shipForm select,
+.shipForm input {
+  font-size: 12px;
+  padding: 4px 6px;
+  border: 1px solid var(--d-line, #e5e1da);
+  border-radius: 6px;
+}
+.shipBtn {
+  font-size: 12px;
+  padding: 5px 8px;
+  border: none;
+  border-radius: 6px;
+  background: var(--d-ink, #2b2b2b);
+  color: #fff;
+  cursor: pointer;
+}
+.shipBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

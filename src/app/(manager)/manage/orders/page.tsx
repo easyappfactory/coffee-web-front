@@ -14,6 +14,7 @@ import {
   useAdminSlotOrders,
   useSlotFundingStatus,
   useSlotPhaseTransition,
+  useShipOrder,
 } from "@/hooks/useAdminOrders"
 import { SlotSelect } from "@/components/manager/SlotSelect"
 import { SlotStatStrip } from "@/components/manager/SlotStatStrip"
@@ -115,6 +116,7 @@ export default function ManageOrdersPage() {
 
   // 상태 전이 뮤테이션
   const phaseTransition = useSlotPhaseTransition(slotId ?? "")
+  const shipOrder = useShipOrder(slotId ?? "")
 
   // 모달 open 상태
   const [startAlertOpen, setStartAlertOpen] = useState(false)
@@ -349,6 +351,10 @@ export default function ManageOrdersPage() {
               perPage={PER_PAGE}
               totalCount={ordersPage?.totalCount ?? 0}
               totalPages={ordersPage?.totalPages ?? 1}
+              shippingOrderId={shipOrder.isPending ? shipOrder.variables?.orderId ?? null : null}
+              onShip={(orderId, trackingNumber, carrierCode) =>
+                shipOrder.mutate({ orderId, trackingNumber, carrierCode })
+              }
             />
           )}
         </>
