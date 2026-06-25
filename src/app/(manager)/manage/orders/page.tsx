@@ -353,7 +353,13 @@ export default function ManageOrdersPage() {
               totalPages={ordersPage?.totalPages ?? 1}
               shippingOrderId={shipOrder.isPending ? shipOrder.variables?.orderId ?? null : null}
               onShip={(orderId, trackingNumber, carrierCode) =>
-                shipOrder.mutate({ orderId, trackingNumber, carrierCode })
+                shipOrder.mutate(
+                  { orderId, trackingNumber, carrierCode },
+                  {
+                    onError: () =>
+                      alert("송장 등록에 실패했습니다. 다시 시도해주세요."),
+                  },
+                )
               }
             />
           )}
