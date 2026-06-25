@@ -260,6 +260,25 @@ export default function ManageOrdersPage() {
               </button>
             </>
           )}
+
+          {/* OPERATING → 출고 시작 (FUNDING_SUCCESS 주문 일괄 배송 준비 전환) */}
+          {slot.phase === "OPERATING" && (
+            <button
+              type="button"
+              className={`${styles.btn} ${styles.btnPrimary}`}
+              disabled={phaseTransition.startShipping.isPending}
+              onClick={() =>
+                phaseTransition.startShipping.mutate(undefined, {
+                  onSuccess: (count) =>
+                    alert(`${count}건 출고를 시작했습니다. (배송 준비 전환)`),
+                })
+              }
+            >
+              {phaseTransition.startShipping.isPending
+                ? "처리 중…"
+                : "출고 시작"}
+            </button>
+          )}
         </div>
       </div>
 
