@@ -455,3 +455,23 @@ export async function confirmFunding(slotId: string): Promise<void> {
 export async function failFunding(slotId: string): Promise<void> {
   await apiClient.post(`${API_PREFIX}/admin/slots/${slotId}/funding/fail`)
 }
+
+// ── 슬롯 출고 시작 / 단건 송장 등록 API ────────────────────────────────────────
+
+export async function startSlotShipping(slotId: string): Promise<number> {
+  const res = await apiClient.post(
+    `${API_PREFIX}/admin/slots/${slotId}/start-shipping`,
+  )
+  return res.data.data.transitionedCount as number
+}
+
+export async function shipOrder(
+  orderId: string,
+  trackingNumber: string,
+  carrierCode: string,
+): Promise<void> {
+  await apiClient.post(`${API_PREFIX}/admin/orders/${orderId}/ship`, {
+    trackingNumber,
+    carrierCode,
+  })
+}

@@ -14,6 +14,7 @@ import {
   useAdminSlotOrders,
   useSlotFundingStatus,
   useSlotPhaseTransition,
+  useShipOrder,
 } from "@/hooks/useAdminOrders"
 import { SlotSelect } from "@/components/manager/SlotSelect"
 import { SlotStatStrip } from "@/components/manager/SlotStatStrip"
@@ -115,6 +116,7 @@ export default function ManageOrdersPage() {
 
   // 상태 전이 뮤테이션
   const phaseTransition = useSlotPhaseTransition(slotId ?? "")
+  const shipOrder = useShipOrder(slotId ?? "")
 
   // 모달 open 상태
   const [startAlertOpen, setStartAlertOpen] = useState(false)
@@ -260,6 +262,25 @@ export default function ManageOrdersPage() {
               </button>
             </>
           )}
+
+          {/* OPERATING → 출고 시작 (FUNDING_SUCCESS 주문 일괄 배송 준비 전환) */}
+          {slot.phase === "OPERATING" && (
+            <button
+              type="button"
+              className={`${styles.btn} ${styles.btnPrimary}`}
+              disabled={phaseTransition.startShipping.isPending}
+              onClick={() =>
+                phaseTransition.startShipping.mutate(undefined, {
+                  onSuccess: (count) =>
+                    alert(`${count}건 출고를 시작했습니다. (배송 준비 전환)`),
+                })
+              }
+            >
+              {phaseTransition.startShipping.isPending
+                ? "처리 중…"
+                : "출고 시작"}
+            </button>
+          )}
         </div>
       </div>
 
@@ -330,6 +351,16 @@ export default function ManageOrdersPage() {
               perPage={PER_PAGE}
               totalCount={ordersPage?.totalCount ?? 0}
               totalPages={ordersPage?.totalPages ?? 1}
+              shippingOrderId={shipOrder.isPending ? shipOrder.variables?.orderId ?? null : null}
+              onShip={(orderId, trackingNumber, carrierCode) =>
+                shipOrder.mutate(
+                  { orderId, trackingNumber, carrierCode },
+                  {
+                    onError: () =>
+                      alert("송장 등록에 실패했습니다. 다시 시도해주세요."),
+                  },
+                )
+              }
             />
           )}
         </>

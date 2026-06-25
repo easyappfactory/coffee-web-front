@@ -1,9 +1,17 @@
 "use client"
 
+import { useState } from "react"
 import { ArrowUpRight, Search } from "lucide-react"
 import type { AdminOrder } from "@/types/adminOrder"
 import { won } from "@/lib/format"
 import styles from "./OrdersTable.module.css"
+
+const COURIERS: { code: string; label: string }[] = [
+  { code: "LOGEN", label: "로젠택배" },
+  { code: "CJGLS", label: "CJ대한통운" },
+  { code: "HANJIN", label: "한진택배" },
+  { code: "EPOST", label: "우체국택배" },
+]
 
 interface OrdersTableProps {
   // 서버에서 받은 "현재 페이지"의 주문들 (클라이언트 슬라이싱 안 함)
@@ -15,6 +23,8 @@ interface OrdersTableProps {
   perPage: number
   totalCount: number
   totalPages: number
+  onShip: (orderId: string, trackingNumber: string, carrierCode: string) => void
+  shippingOrderId: string | null
 }
 
 type CbxState = "on" | "off" | "mixed"
@@ -61,6 +71,50 @@ function Cbx({
   )
 }
 
+function ShipForm({
+  orderId,
+  pending,
+  onShip,
+}: {
+  orderId: string
+  pending: boolean
+  onShip: (orderId: string, trackingNumber: string, carrierCode: string) => void
+}) {
+  const [carrierCode, setCarrierCode] = useState(COURIERS[0].code)
+  const [trackingNumber, setTrackingNumber] = useState("")
+  const canSubmit = trackingNumber.trim().length > 0 && !pending
+  return (
+    <div className={styles.shipForm}>
+      <select
+        value={carrierCode}
+        onChange={(e) => setCarrierCode(e.target.value)}
+        disabled={pending}
+      >
+        {COURIERS.map((c) => (
+          <option key={c.code} value={c.code}>
+            {c.label}
+          </option>
+        ))}
+      </select>
+      <input
+        type="text"
+        placeholder="송장번호"
+        value={trackingNumber}
+        onChange={(e) => setTrackingNumber(e.target.value)}
+        disabled={pending}
+      />
+      <button
+        type="button"
+        className={styles.shipBtn}
+        disabled={!canSubmit}
+        onClick={() => onShip(orderId, trackingNumber.trim(), carrierCode)}
+      >
+        {pending ? "등록 중…" : "송장 등록"}
+      </button>
+    </div>
+  )
+}
+
 export function OrdersTable({
   orders,
   selected,
@@ -70,6 +124,8 @@ export function OrdersTable({
   perPage,
   totalCount,
   totalPages,
+  onShip,
+  shippingOrderId,
 }: OrdersTableProps) {
   const allIds = orders.map((o) => o.orderId)
   const selCount = allIds.filter((id) => selected.has(id)).length
@@ -202,6 +258,12 @@ export function OrdersTable({
                           </button>
                         </div>
                       </>
+                    ) : o.deliveryStatus === "PREPARING_SHIPPING" ? (
+                      <ShipForm
+                        orderId={o.orderId}
+                        pending={shippingOrderId === o.orderId}
+                        onShip={onShip}
+                      />
                     ) : (
                       <div className={styles.invEmpty}>미등록</div>
                     )}

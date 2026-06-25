@@ -8,6 +8,8 @@ import {
   stopFunding as stopFundingApi,
   confirmFunding as confirmFundingApi,
   failFunding as failFundingApi,
+  startSlotShipping as startSlotShippingApi,
+  shipOrder as shipOrderApi,
 } from "@/lib/api"
 import type { AdminOrderTab } from "@/types/adminOrder"
 
@@ -70,5 +72,28 @@ export const useSlotPhaseTransition = (slotId: string) => {
     onSuccess: invalidate,
   })
 
-  return { startFunding, stopFunding, confirmFunding, failFunding }
+  const startShipping = useMutation({
+    mutationFn: () => startSlotShippingApi(slotId),
+    onSuccess: invalidate,
+  })
+
+  return { startFunding, stopFunding, confirmFunding, failFunding, startShipping }
+}
+
+export const useShipOrder = (slotId: string) => {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({
+      orderId,
+      trackingNumber,
+      carrierCode,
+    }: {
+      orderId: string
+      trackingNumber: string
+      carrierCode: string
+    }) => shipOrderApi(orderId, trackingNumber, carrierCode),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "slot", slotId] })
+    },
+  })
 }
