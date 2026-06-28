@@ -256,12 +256,16 @@ export function OrdersTable({
                         </div>
                       </>
                     ) : o.deliveryStatus === "PREPARING_SHIPPING" ? (
-                      <ShipForm
-                        orderId={o.orderId}
-                        pending={shippingOrderId === o.orderId}
-                        onShip={onShip}
-                        couriers={couriers}
-                      />
+                      couriers.length > 0 ? (
+                        <ShipForm
+                          orderId={o.orderId}
+                          pending={shippingOrderId === o.orderId}
+                          onShip={onShip}
+                          couriers={couriers}
+                        />
+                      ) : (
+                        <div className={styles.invEmpty}>로딩 중…</div>
+                      )
                     ) : (
                       <div className={styles.invEmpty}>미등록</div>
                     )}

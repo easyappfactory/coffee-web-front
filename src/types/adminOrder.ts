@@ -4,6 +4,7 @@ export interface Courier {
   code: string
   name: string
 }
+
 export type AdminOrderTab = "all" | "funding" | "pre" | "post" | "cancel" | "exchange"
 
 export interface AdminSlot {
