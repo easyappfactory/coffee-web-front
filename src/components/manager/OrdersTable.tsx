@@ -2,16 +2,9 @@
 
 import { useState } from "react"
 import { ArrowUpRight, Search } from "lucide-react"
-import type { AdminOrder } from "@/types/adminOrder"
+import type { AdminOrder, Courier } from "@/types/adminOrder"
 import { won } from "@/lib/format"
 import styles from "./OrdersTable.module.css"
-
-const COURIERS: { code: string; label: string }[] = [
-  { code: "LOGEN", label: "로젠택배" },
-  { code: "CJGLS", label: "CJ대한통운" },
-  { code: "HANJIN", label: "한진택배" },
-  { code: "EPOST", label: "우체국택배" },
-]
 
 interface OrdersTableProps {
   // 서버에서 받은 "현재 페이지"의 주문들 (클라이언트 슬라이싱 안 함)
@@ -25,6 +18,7 @@ interface OrdersTableProps {
   totalPages: number
   onShip: (orderId: string, trackingNumber: string, carrierCode: string) => void
   shippingOrderId: string | null
+  couriers: Courier[]
 }
 
 type CbxState = "on" | "off" | "mixed"
@@ -75,14 +69,16 @@ function ShipForm({
   orderId,
   pending,
   onShip,
+  couriers,
 }: {
   orderId: string
   pending: boolean
   onShip: (orderId: string, trackingNumber: string, carrierCode: string) => void
+  couriers: Courier[]
 }) {
-  const [carrierCode, setCarrierCode] = useState(COURIERS[0].code)
+  const [carrierCode, setCarrierCode] = useState(couriers[0]?.code ?? "")
   const [trackingNumber, setTrackingNumber] = useState("")
-  const canSubmit = trackingNumber.trim().length > 0 && !pending
+  const canSubmit = trackingNumber.trim().length > 0 && carrierCode.length > 0 && !pending
   return (
     <div className={styles.shipForm}>
       <select
@@ -90,9 +86,9 @@ function ShipForm({
         onChange={(e) => setCarrierCode(e.target.value)}
         disabled={pending}
       >
-        {COURIERS.map((c) => (
+        {couriers.map((c) => (
           <option key={c.code} value={c.code}>
-            {c.label}
+            {c.name}
           </option>
         ))}
       </select>
@@ -126,6 +122,7 @@ export function OrdersTable({
   totalPages,
   onShip,
   shippingOrderId,
+  couriers,
 }: OrdersTableProps) {
   const allIds = orders.map((o) => o.orderId)
   const selCount = allIds.filter((id) => selected.has(id)).length
@@ -263,6 +260,7 @@ export function OrdersTable({
                         orderId={o.orderId}
                         pending={shippingOrderId === o.orderId}
                         onShip={onShip}
+                        couriers={couriers}
                       />
                     ) : (
                       <div className={styles.invEmpty}>미등록</div>

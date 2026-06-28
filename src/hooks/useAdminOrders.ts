@@ -10,11 +10,15 @@ import {
   failFunding as failFundingApi,
   startSlotShipping as startSlotShippingApi,
   shipOrder as shipOrderApi,
+  getCouriers,
 } from "@/lib/api"
 import type { AdminOrderTab } from "@/types/adminOrder"
 
 export const useAdminSlots = () =>
   useQuery({ queryKey: ["admin", "slots"], queryFn: getAdminSlots })
+
+export const useCouriers = () =>
+  useQuery({ queryKey: ["admin", "couriers"], queryFn: getCouriers, staleTime: Infinity })
 
 export const useAdminSlotSummary = (slotId?: string) =>
   useQuery({
