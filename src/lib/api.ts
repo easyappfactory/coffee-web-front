@@ -15,6 +15,7 @@ import type {
   AdminOrderTab,
   AdminOrderPage,
   SlotFundingStatus,
+  Courier,
 } from "@/types/adminOrder";
 
 export const apiClient = axios.create({
@@ -474,4 +475,9 @@ export async function shipOrder(
     trackingNumber,
     carrierCode,
   })
+}
+
+export async function getCouriers(): Promise<Courier[]> {
+  const res = await apiClient.get(`${API_PREFIX}/admin/couriers`)
+  return res.data.data.couriers as Courier[]
 }

@@ -1,4 +1,10 @@
 export type SlotPhase = "PRE" | "FUNDING" | "PENDING" | "FAILED" | "OPERATING" | "CLOSED"
+
+export interface Courier {
+  code: string
+  name: string
+}
+
 export type AdminOrderTab = "all" | "funding" | "pre" | "post" | "cancel" | "exchange"
 
 export interface AdminSlot {
