@@ -82,21 +82,21 @@ function CheckoutContent() {
   }
 
   async function handlePay() {
-    if (!widgets || isPaying) return
+    if (!widgets || isPaying || !shippingAddress || !orderId) return
     setIsPaying(true)
     setPayError(null)
     try {
-      await saveOrderShippingAddress(orderId!, {
-        receiverName: shippingAddress!.receiverName,
-        receiverPhone: shippingAddress!.receiverPhone,
-        address: shippingAddress!.address,
-        addressDetail: shippingAddress!.addressDetail,
-        zipcode: shippingAddress!.zipcode,
+      await saveOrderShippingAddress(orderId, {
+        receiverName: shippingAddress.receiverName,
+        receiverPhone: shippingAddress.receiverPhone,
+        address: shippingAddress.address,
+        addressDetail: shippingAddress.addressDetail,
+        zipcode: shippingAddress.zipcode,
         saveAsDefault: saveAsDefault ?? false,
       })
 
       await widgets.requestPayment({
-        orderId: orderId!,
+        orderId: orderId,
         orderName,
         successUrl: `${window.location.origin}/checkout/complete`,
         failUrl: `${window.location.origin}/checkout?fail=true`,
@@ -105,7 +105,7 @@ function CheckoutContent() {
       setIsPaying(false)
       const msg =
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (e as any)?.response?.data?.message ?? "배송지 저장에 실패했습니다. 다시 시도해 주세요."
+        (e as any)?.response?.data?.message ?? "결제 진행 중 오류가 발생했습니다. 다시 시도해 주세요."
       setPayError(msg)
     }
   }
