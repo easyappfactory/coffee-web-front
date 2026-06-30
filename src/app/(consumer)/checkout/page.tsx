@@ -8,6 +8,7 @@ import { ChevronLeft, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useCheckoutStore } from "@/store/checkoutStore"
 import { ShippingAddressSection } from "@/components/checkout/ShippingAddressSection"
+import { saveOrderShippingAddress } from "@/lib/api"
 
 const TOSS_CLIENT_KEY = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY ?? ""
 
@@ -24,12 +25,15 @@ function CheckoutContent() {
     masterName,
     selectedReward,
     isShippingReady,
+    shippingAddress,
+    saveAsDefault,
   } = useCheckoutStore()
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [widgets, setWidgets] = useState<any>(null)
   const [widgetReady, setWidgetReady] = useState(false)
   const [isPaying, setIsPaying] = useState(false)
+  const [payError, setPayError] = useState<string | null>(null)
 
   const isFail = searchParams.get("fail") === "true"
 
@@ -78,18 +82,31 @@ function CheckoutContent() {
   }
 
   async function handlePay() {
-    if (!widgets || isPaying) return
+    if (!widgets || isPaying || !shippingAddress || !orderId) return
     setIsPaying(true)
+    setPayError(null)
     try {
+      await saveOrderShippingAddress(orderId, {
+        receiverName: shippingAddress.receiverName,
+        receiverPhone: shippingAddress.receiverPhone,
+        address: shippingAddress.address,
+        addressDetail: shippingAddress.addressDetail,
+        zipcode: shippingAddress.zipcode,
+        saveAsDefault: saveAsDefault ?? false,
+      })
+
       await widgets.requestPayment({
-        orderId: orderId!,
+        orderId: orderId,
         orderName,
         successUrl: `${window.location.origin}/checkout/complete`,
         failUrl: `${window.location.origin}/checkout?fail=true`,
       })
-    } catch {
-      // 사용자 취소 또는 오류 — 위젯이 자체 처리
+    } catch (e) {
       setIsPaying(false)
+      const msg =
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (e as any)?.response?.data?.message ?? "결제 진행 중 오류가 발생했습니다. 다시 시도해 주세요."
+      setPayError(msg)
     }
   }
 
@@ -199,6 +216,13 @@ function CheckoutContent() {
         <section className="mt-3">
           <div id="agreement" />
         </section>
+
+        {/* 배송지 저장 오류 */}
+        {payError && (
+          <div className="mt-5 rounded-inner border border-red-200 bg-red-50 px-5 py-4">
+            <p className="text-[13px] font-medium text-red-700">{payError}</p>
+          </div>
+        )}
 
         {/* 결제 버튼 */}
         <div className="mt-6">

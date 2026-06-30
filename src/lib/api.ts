@@ -61,8 +61,6 @@ export async function confirmPayment(
   paymentKey: string,
   orderId: string,
   amount: number,
-  shippingAddress?: SaveShippingAddressRequest,
-  saveAsDefault?: boolean,
 ): Promise<{
   orderId: string;
   publicOrderNumber: string;
@@ -72,9 +70,24 @@ export async function confirmPayment(
   paymentKey: string;
 }> {
   const res = await apiClient.post(`${API_PREFIX}/order/confirm`, {
-    paymentKey, orderId, amount, shippingAddress, saveAsDefault,
+    paymentKey, orderId, amount,
   });
   return res.data.data;
+}
+
+export async function saveOrderShippingAddress(
+  orderId: string,
+  body: SaveShippingAddressRequest & { saveAsDefault: boolean },
+): Promise<{
+  orderId: string;
+  receiverName: string;
+  receiverPhone: string;
+  address: string;
+  addressDetail: string | null;
+  zipcode: string;
+}> {
+  const res = await apiClient.put(`${API_PREFIX}/order/${orderId}/shipping-address`, body)
+  return res.data.data
 }
 
 function delay(ms = 300) {
