@@ -94,3 +94,16 @@ export interface InvoiceMatchPreview {
   okCount: number
   badCount: number
 }
+
+export interface TrackingEvent {
+  time: string
+  location: string
+  description: string
+}
+
+export interface TrackingInfo {
+  carrierName: string
+  trackingNumber: string
+  status: string
+  tracks: TrackingEvent[]
+}
