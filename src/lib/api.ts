@@ -16,6 +16,7 @@ import type {
   AdminOrderPage,
   SlotFundingStatus,
   Courier,
+  TrackingInfo,
 } from "@/types/adminOrder";
 
 export const apiClient = axios.create({
@@ -413,9 +414,9 @@ export async function getOrderDetail(orderId: string) {
   return res.data.data
 }
 
-export async function getOrderTracking(orderId: string) {
+export async function getOrderTracking(orderId: string): Promise<TrackingInfo> {
   const res = await apiClient.get(`${API_PREFIX}/orders/${orderId}/tracking`)
-  return res.data.data
+  return res.data.data as TrackingInfo
 }
 
 // ── 판매자 어드민 주문·배송 관리 API (읽기) ──────────────────────────────────
@@ -493,4 +494,15 @@ export async function shipOrder(
 export async function getCouriers(): Promise<Courier[]> {
   const res = await apiClient.get(`${API_PREFIX}/admin/couriers`)
   return res.data.data.couriers as Courier[]
+}
+
+export async function updateOrderTracking(
+  orderId: string,
+  trackingNumber: string,
+  carrierCode: string,
+): Promise<void> {
+  await apiClient.patch(`${API_PREFIX}/admin/orders/${orderId}/ship`, {
+    trackingNumber,
+    carrierCode,
+  })
 }
