@@ -11,6 +11,8 @@ import {
   startSlotShipping as startSlotShippingApi,
   shipOrder as shipOrderApi,
   getCouriers,
+  getOrderTracking,
+  updateOrderTracking,
 } from "@/lib/api"
 import type { AdminOrderTab } from "@/types/adminOrder"
 
@@ -98,6 +100,33 @@ export const useShipOrder = (slotId: string) => {
     }) => shipOrderApi(orderId, trackingNumber, carrierCode),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "slot", slotId] })
+    },
+  })
+}
+
+export const useOrderTracking = (orderId: string | null, hasTracking: boolean) =>
+  useQuery({
+    queryKey: ["admin", "order", orderId, "tracking"],
+    queryFn: () => getOrderTracking(orderId!),
+    enabled: !!orderId && hasTracking,
+    retry: false,
+  })
+
+export const useUpdateOrderTracking = (slotId: string) => {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({
+      orderId,
+      trackingNumber,
+      carrierCode,
+    }: {
+      orderId: string
+      trackingNumber: string
+      carrierCode: string
+    }) => updateOrderTracking(orderId, trackingNumber, carrierCode),
+    onSuccess: (_data, { orderId }) => {
+      qc.invalidateQueries({ queryKey: ["admin", "slot", slotId] })
+      qc.invalidateQueries({ queryKey: ["admin", "order", orderId, "tracking"] })
     },
   })
 }
