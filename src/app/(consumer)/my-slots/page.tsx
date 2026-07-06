@@ -32,22 +32,26 @@ export default function MySlotsPage() {
         )}
       </div>
 
-      <div className="mb-5 flex flex-wrap gap-2">
-        {CHIPS.map((chip) => {
-          const on = filter === chip.key
-          return (
-            <button
-              key={chip.key}
-              onClick={() => setFilter(chip.key)}
-              className={`rounded-pill px-3 py-1.5 text-xs font-semibold transition ${
-                on ? "bg-brand text-white" : "bg-gray-100 text-ink-2 hover:bg-gray-200"
-              }`}
-            >
-              {chip.label} {countOf(chip.key)}
-            </button>
-          )
-        })}
-      </div>
+      {!isLoading && !isError && all.length > 0 && (
+        <div className="mb-5 flex flex-wrap gap-2">
+          {CHIPS.map((chip) => {
+            const on = filter === chip.key
+            return (
+              <button
+                key={chip.key}
+                type="button"
+                aria-pressed={on}
+                onClick={() => setFilter(chip.key)}
+                className={`rounded-pill px-3 py-1.5 text-xs font-semibold transition ${
+                  on ? "bg-brand text-white" : "bg-gray-100 text-ink-2 hover:bg-gray-200"
+                }`}
+              >
+                {chip.label} {countOf(chip.key)}
+              </button>
+            )
+          })}
+        </div>
+      )}
 
       {isLoading ? (
         <div className="space-y-3">
@@ -61,7 +65,9 @@ export default function MySlotsPage() {
         </div>
       ) : visible.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-[var(--ink-muted)]">
-          <p className="text-lg">참여한 슬롯이 없습니다</p>
+          <p className="text-lg">
+            {filter === "all" ? "참여한 슬롯이 없습니다" : "이 필터에 해당하는 슬롯이 없습니다"}
+          </p>
         </div>
       ) : (
         <div className="space-y-3">

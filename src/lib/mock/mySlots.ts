@@ -54,6 +54,6 @@ export const mockMySlots: MySlot[] = [
     phaseLabel: "운영 중",
     deadline: "2026-06-04",
     funding: { currentAmount: 2000000, targetAmount: 1000000, percent: 200 },
-    activity: { lastPostAt: "2026-07-04T00:00:00Z", recentPostCount: 1, hasRecentActivity: false },
+    activity: { lastPostAt: "2026-07-04T00:00:00Z", recentPostCount: 1, hasRecentActivity: true },
   },
 ]
