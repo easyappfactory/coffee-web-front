@@ -30,7 +30,7 @@ export function Navbar() {
               href={href}
               className={cn(
                 "text-sm font-medium transition-colors hover:text-brand",
-                (href === "/" ? pathname === "/" : pathname.startsWith(href))
+                (href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(href + "/"))
                   ? "border-b-2 border-brand text-brand"
                   : "text-ink-2"
               )}
