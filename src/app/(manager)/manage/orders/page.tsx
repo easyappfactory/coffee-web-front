@@ -355,6 +355,7 @@ export default function ManageOrdersPage() {
               totalPages={ordersPage?.totalPages ?? 1}
               shippingOrderId={shipOrder.isPending ? shipOrder.variables?.orderId ?? null : null}
               couriers={couriersQuery.data ?? []}
+              slotId={slotId ?? ""}
               onShip={(orderId, trackingNumber, carrierCode) =>
                 shipOrder.mutate(
                   { orderId, trackingNumber, carrierCode },

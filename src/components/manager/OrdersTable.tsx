@@ -5,6 +5,7 @@ import { ArrowUpRight, Search } from "lucide-react"
 import type { AdminOrder, Courier } from "@/types/adminOrder"
 import { won } from "@/lib/format"
 import styles from "./OrdersTable.module.css"
+import TrackingModal from "./TrackingModal"
 
 interface OrdersTableProps {
   // 서버에서 받은 "현재 페이지"의 주문들 (클라이언트 슬라이싱 안 함)
@@ -19,6 +20,7 @@ interface OrdersTableProps {
   onShip: (orderId: string, trackingNumber: string, carrierCode: string) => void
   shippingOrderId: string | null
   couriers: Courier[]
+  slotId: string
 }
 
 type CbxState = "on" | "off" | "mixed"
@@ -123,7 +125,9 @@ export function OrdersTable({
   onShip,
   shippingOrderId,
   couriers,
+  slotId,
 }: OrdersTableProps) {
+  const [trackingOrder, setTrackingOrder] = useState<AdminOrder | null>(null)
   const allIds = orders.map((o) => o.orderId)
   const selCount = allIds.filter((id) => selected.has(id)).length
   const headState: CbxState =
@@ -155,6 +159,7 @@ export function OrdersTable({
   const rows = orders
 
   return (
+    <>
     <div className={styles.tableCard}>
       <div className={styles.tblScroll}>
         <table className={styles.table}>
@@ -247,9 +252,12 @@ export function OrdersTable({
                     {o.trackingNumber ? (
                       <>
                         <div className={styles.invCourier}>{o.courier}</div>
-                        {/* 단순 표시만 — 배송조회 팝업은 다음 슬라이스 */}
                         <div className={styles.invNo}>
-                          <button className={styles.trackBtn} type="button">
+                          <button
+                            className={styles.trackBtn}
+                            type="button"
+                            onClick={() => setTrackingOrder(o)}
+                          >
                             {o.trackingNumber}
                             <ArrowUpRight size={14} />
                           </button>
@@ -315,5 +323,15 @@ export function OrdersTable({
         </div>
       </div>
     </div>
+
+      {trackingOrder && (
+        <TrackingModal
+          order={trackingOrder}
+          slotId={slotId}
+          couriers={couriers}
+          onClose={() => setTrackingOrder(null)}
+        />
+      )}
+    </>
   )
 }
