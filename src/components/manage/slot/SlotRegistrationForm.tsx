@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { useForm, FormProvider } from "react-hook-form"
 import { BookOpen, Coffee, CreditCard } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -20,6 +21,7 @@ const FORM_TABS = [
 type FormTabId = (typeof FORM_TABS)[number]["id"]
 
 export function SlotRegistrationForm() {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState<FormTabId>("story")
   const [modalOpen, setModalOpen] = useState(false)
   const { mutate, isPending } = useCreateSlot()
@@ -150,6 +152,7 @@ export function SlotRegistrationForm() {
           alert("슬롯이 등록되었습니다!")
           methods.reset()
           setModalOpen(false)
+          router.push("/manage/slots")
         },
       },
     )
