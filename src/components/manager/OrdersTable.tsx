@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { ArrowUpRight, Search } from "lucide-react"
 import type { AdminOrder, Courier } from "@/types/adminOrder"
 import { won } from "@/lib/format"
@@ -128,6 +128,14 @@ export function OrdersTable({
   slotId,
 }: OrdersTableProps) {
   const [trackingOrder, setTrackingOrder] = useState<AdminOrder | null>(null)
+  const [toastMsg, setToastMsg] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!toastMsg) return
+    const t = setTimeout(() => setToastMsg(null), 3000)
+    return () => clearTimeout(t)
+  }, [toastMsg])
+
   const allIds = orders.map((o) => o.orderId)
   const selCount = allIds.filter((id) => selected.has(id)).length
   const headState: CbxState =
@@ -324,12 +332,19 @@ export function OrdersTable({
       </div>
     </div>
 
+      {toastMsg && (
+        <div className={styles.toastWrap} aria-live="polite">
+          <div className={styles.toast}>{toastMsg}</div>
+        </div>
+      )}
+
       {trackingOrder && (
         <TrackingModal
           order={trackingOrder}
           slotId={slotId}
           couriers={couriers}
           onClose={() => setTrackingOrder(null)}
+          onSuccess={() => setToastMsg("운송장이 변경되었습니다")}
         />
       )}
     </>

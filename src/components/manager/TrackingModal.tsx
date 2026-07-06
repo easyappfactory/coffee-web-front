@@ -12,11 +12,12 @@ interface TrackingModalProps {
   slotId: string
   couriers: Courier[]
   onClose: () => void
+  onSuccess?: () => void
 }
 
-export default function TrackingModal({ order, slotId, couriers, onClose }: TrackingModalProps) {
+export default function TrackingModal({ order, slotId, couriers, onClose, onSuccess }: TrackingModalProps) {
   const hasTracking = !!order.trackingNumber
-  const { data: tracking, isLoading, isError } = useOrderTracking(order.orderId, hasTracking)
+  const { data: tracking, isLoading, isError, refetch } = useOrderTracking(order.orderId, hasTracking)
   const updateMut = useUpdateOrderTracking(slotId)
 
   const [carrierCode, setCarrierCode] = useState<string>(
@@ -40,6 +41,7 @@ export default function TrackingModal({ order, slotId, couriers, onClose }: Trac
       {
         onSuccess: () => {
           setConfirmOpen(false)
+          onSuccess?.()
           onClose()
         },
       },
@@ -56,7 +58,12 @@ export default function TrackingModal({ order, slotId, couriers, onClose }: Trac
           ) : isLoading ? (
             <p className={styles.notice}>배송 정보를 불러오는 중…</p>
           ) : isError || !tracking ? (
-            <p className={styles.notice}>배송 조회에 실패했습니다. 잠시 후 다시 시도해 주세요.</p>
+            <div className={styles.errorState}>
+              <p className={styles.notice}>배송 조회에 실패했습니다. 잠시 후 다시 시도해 주세요.</p>
+              <button type="button" className={styles.ghostBtn} onClick={() => refetch()}>
+                다시 시도
+              </button>
+            </div>
           ) : (
             <>
               <div className={styles.summary}>
