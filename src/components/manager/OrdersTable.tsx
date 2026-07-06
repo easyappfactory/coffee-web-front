@@ -340,6 +340,7 @@ export function OrdersTable({
 
       {trackingOrder && (
         <TrackingModal
+          key={trackingOrder.orderId}
           order={trackingOrder}
           slotId={slotId}
           couriers={couriers}

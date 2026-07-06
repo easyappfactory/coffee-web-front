@@ -370,9 +370,6 @@ export default function ManageOrdersPage() {
         </>
       )}
 
-      {/* Toast container — 추후 액션 피드백용 */}
-      <div className={styles.toastWrap} aria-live="polite" />
-
       {/* ── 모달 ─────────────────────────────────────────────────────────────── */}
 
       {/* PRE: 펀딩 시작 경고 모달 */}

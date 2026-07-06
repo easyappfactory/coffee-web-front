@@ -20,19 +20,19 @@ export default function TrackingModal({ order, slotId, couriers, onClose, onSucc
   const { data: tracking, isLoading, isError, refetch } = useOrderTracking(order.orderId, hasTracking)
   const updateMut = useUpdateOrderTracking(slotId)
 
-  const [carrierCode, setCarrierCode] = useState<string>(
-    couriers.find((c) => c.name === order.courier)?.code ?? "",
-  )
+  const originalCarrierCode = couriers.find((c) => c.name === order.courier)?.code ?? ""
+
+  const [carrierCode, setCarrierCode] = useState<string>(originalCarrierCode)
   const [trackingNumber, setTrackingNumber] = useState<string>(order.trackingNumber ?? "")
   const [confirmOpen, setConfirmOpen] = useState(false)
 
   const dirty =
     trackingNumber.trim() !== (order.trackingNumber ?? "") ||
-    carrierCode !== (couriers.find((c) => c.name === order.courier)?.code ?? "")
+    carrierCode !== originalCarrierCode
 
   const resetEdit = () => {
     setTrackingNumber(order.trackingNumber ?? "")
-    setCarrierCode(couriers.find((c) => c.name === order.courier)?.code ?? "")
+    setCarrierCode(originalCarrierCode)
   }
 
   const doUpdate = () => {
@@ -44,6 +44,7 @@ export default function TrackingModal({ order, slotId, couriers, onClose, onSucc
           onSuccess?.()
           onClose()
         },
+        onError: () => alert("운송장 변경에 실패했습니다. 다시 시도해주세요."),
       },
     )
   }
