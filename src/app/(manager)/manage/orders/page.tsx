@@ -355,6 +355,7 @@ export default function ManageOrdersPage() {
               totalPages={ordersPage?.totalPages ?? 1}
               shippingOrderId={shipOrder.isPending ? shipOrder.variables?.orderId ?? null : null}
               couriers={couriersQuery.data ?? []}
+              slotId={slotId ?? ""}
               onShip={(orderId, trackingNumber, carrierCode) =>
                 shipOrder.mutate(
                   { orderId, trackingNumber, carrierCode },
@@ -368,9 +369,6 @@ export default function ManageOrdersPage() {
           )}
         </>
       )}
-
-      {/* Toast container — 추후 액션 피드백용 */}
-      <div className={styles.toastWrap} aria-live="polite" />
 
       {/* ── 모달 ─────────────────────────────────────────────────────────────── */}
 
