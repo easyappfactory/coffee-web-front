@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import axios from "axios"
 import { RadarChart } from "./RadarChart"
 import { FlavorBars } from "./FlavorBars"
@@ -17,6 +17,13 @@ import type { SlotDetail } from "@/types/slot"
 import type { useCommunityPosts } from "@/hooks/useCommunityPosts"
 
 const TABS = ["스토리", "플레이버", "펀딩", "커뮤니티"] as const
+
+const TAB_QUERY_MAP: Record<string, (typeof TABS)[number]> = {
+  story: "스토리",
+  flavor: "플레이버",
+  funding: "펀딩",
+  community: "커뮤니티",
+}
 
 function formatKRW(n: number) {
   if (n >= 10000000) return `${(n / 10000000).toFixed(1)}천만원`
@@ -46,7 +53,9 @@ export function SlotDetailTabs({ slot, slotId, communityQuery }: SlotDetailTabsP
     quantity,
   } = useCheckoutStore()
 
-  const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>("스토리")
+  const searchParams = useSearchParams()
+  const initialTab = TAB_QUERY_MAP[searchParams.get("tab") ?? ""] ?? "스토리"
+  const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>(initialTab)
   const [selectedReward, setSelectedReward] = useState<string | null>(null)
   const [isOrdering, setIsOrdering] = useState(false)
   const [orderError, setOrderError] = useState<string | null>(null)

@@ -5,7 +5,9 @@ import {
   mockSlotFundingData,
   mockMaster,
 } from "./mock/slots";
+import { mockMySlots } from "./mock/mySlots"
 import type { Slot, SlotDetail } from "@/types/slot";
+import type { MySlot } from "@/types/mySlot"
 import type { FundingStatus, Reward } from "@/types/funding";
 import type { Master } from "@/types/user";
 import type { ShippingAddress, SaveShippingAddressRequest } from "@/types/shipping";
@@ -505,4 +507,12 @@ export async function updateOrderTracking(
     trackingNumber,
     carrierCode,
   })
+}
+
+// ── MY SLOTS (내 참여 슬롯) ──────────────────────────────────────────────────
+export async function getMySlots(): Promise<MySlot[]> {
+  // 오프라인 미리보기: NEXT_PUBLIC_USE_MYSLOTS_MOCK=true 이면 mock 반환
+  if (process.env.NEXT_PUBLIC_USE_MYSLOTS_MOCK === "true") return mockMySlots
+  const res = await apiClient.get(`${API_PREFIX}/my/slots`)
+  return res.data.data.slots as MySlot[]
 }

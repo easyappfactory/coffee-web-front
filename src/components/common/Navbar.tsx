@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 const NAV_LINKS = [
   { label: "HOME", href: "/" },
   { label: "SLOT FEED", href: "/feed" },
-  { label: "MESSAGE", href: "/message" },
+  { label: "MY SLOTS", href: "/my-slots" },
   { label: "MY PAGE", href: "/my" },
 ];
 
@@ -30,7 +30,7 @@ export function Navbar() {
               href={href}
               className={cn(
                 "text-sm font-medium transition-colors hover:text-brand",
-                (href === "/" ? pathname === "/" : pathname.startsWith(href))
+                (href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(href + "/"))
                   ? "border-b-2 border-brand text-brand"
                   : "text-ink-2"
               )}
