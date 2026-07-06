@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 const NAV_LINKS = [
   { label: "HOME", href: "/" },
   { label: "SLOT FEED", href: "/feed" },
-  { label: "MESSAGE", href: "/message" },
+  { label: "MY SLOTS", href: "/my-slots" },
   { label: "MY PAGE", href: "/my" },
 ];
 
