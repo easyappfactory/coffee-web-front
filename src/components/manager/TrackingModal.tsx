@@ -17,6 +17,7 @@ interface TrackingModalProps {
 
 export default function TrackingModal({ order, slotId, couriers, onClose, onSuccess }: TrackingModalProps) {
   const hasTracking = !!order.trackingNumber
+  const editable = order.deliveryStatus === "WAYBILL_REGISTERED"
   const { data: tracking, isLoading, isError, refetch } = useOrderTracking(order.orderId, hasTracking)
   const updateMut = useUpdateOrderTracking(slotId)
 
@@ -90,7 +91,7 @@ export default function TrackingModal({ order, slotId, couriers, onClose, onSucc
         </section>
 
         {/* ② 수정 영역 */}
-        {hasTracking && (
+        {editable && (
           <section className={styles.editSection}>
             <h4 className={styles.editTitle}>운송장 수정</h4>
             <div className={styles.editRow}>
@@ -126,6 +127,9 @@ export default function TrackingModal({ order, slotId, couriers, onClose, onSucc
               </button>
             </div>
           </section>
+        )}
+        {hasTracking && !editable && (
+          <p className={styles.notice}>배송이 진행되어 운송장을 수정할 수 없습니다.</p>
         )}
       </Modal>
 
