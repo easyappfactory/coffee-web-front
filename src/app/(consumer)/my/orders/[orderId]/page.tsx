@@ -2,6 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation"
 import { useState } from "react"
+import { Copy, Check } from "lucide-react"
 import { format } from "date-fns"
 import { useOrderDetail } from "@/hooks/useOrders"
 import { OrderStatusBadge } from "@/components/my/OrderStatusBadge"
@@ -16,6 +17,14 @@ export default function OrderDetailPage() {
   const router = useRouter()
   const { data: order, isLoading } = useOrderDetail(orderId)
   const [trackingOpen, setTrackingOpen] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  function copyTracking() {
+    if (!order?.trackingNumber) return
+    navigator.clipboard?.writeText(order.trackingNumber)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
+  }
 
   if (isLoading) {
     return (
@@ -81,15 +90,42 @@ export default function OrderDetailPage() {
       {/* 배송 정보 (운송장 등록 시에만) */}
       {order.trackingNumber && (
         <section className="mb-4 rounded-xl border bg-white p-5">
-          <h2 className="mb-3 text-sm font-semibold text-[var(--ink-muted)]">배송 정보</h2>
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-[var(--ink-muted)]">운송장</span>
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-[var(--ink-muted)]">배송 정보</h2>
             <button
               onClick={() => setTrackingOpen(true)}
-              className="font-medium text-blue-600 underline underline-offset-2 hover:text-blue-800"
+              className="rounded-lg border border-[var(--d-brown)] px-3 py-1.5 text-xs font-semibold text-[var(--d-brown)] transition-colors hover:bg-[var(--d-brown)] hover:text-white"
             >
-              {order.trackingNumber} ↗
+              배송정보 보기
             </button>
+          </div>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <span className="text-[var(--ink-muted)]">택배사</span>
+              <span className="font-medium">{order.carrierName ?? order.carrierCode ?? "-"}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-[var(--ink-muted)]">운송장번호</span>
+              <span className="inline-flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={copyTracking}
+                  title="클릭하면 복사됩니다"
+                  className="font-medium tabular-nums text-[var(--ink-1)] underline-offset-2 hover:underline"
+                >
+                  {order.trackingNumber}
+                </button>
+                <button
+                  type="button"
+                  onClick={copyTracking}
+                  title="송장번호 복사"
+                  aria-label="송장번호 복사"
+                  className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-gray-200 bg-gray-50 text-gray-500 transition-colors hover:bg-gray-100 hover:text-[var(--d-brown)]"
+                >
+                  {copied ? <Check size={14} /> : <Copy size={14} />}
+                </button>
+              </span>
+            </div>
           </div>
         </section>
       )}

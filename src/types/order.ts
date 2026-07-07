@@ -32,6 +32,7 @@ export interface OrderDetail {
   shippingAddress: ShippingAddressInfo | null
   trackingNumber: string | null
   carrierCode: string | null
+  carrierName: string | null
   exchangeTrackingNumber: string | null
   paidAt: string | null
   createdAt: string
